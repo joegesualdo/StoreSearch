@@ -55,11 +55,14 @@
 
 - (NSInteger)tableView:(UITableView *)tableView
     numberOfRowsInSection:(NSInteger)section {
-  if (_searchResults == nil) {
-    return 0;
-  } else {
-    return [_searchResults count];
-  }
+    if (_searchResults == nil) {
+        return 0;
+    // If there are no results this now returns 1, for the row with the text “(Nothing Found)”.
+    } else if ([_searchResults count] == 0) {
+        return 1;
+    } else {
+        return [_searchResults count];
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
@@ -74,11 +77,33 @@
     cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
                                   reuseIdentifier:CellIdentifier];
   }
-  SearchResult *searchResult = _searchResults[indexPath.row];
-  cell.textLabel.text = searchResult.name;
-  cell.detailTextLabel.text = searchResult.artistName;
-
+    if ([_searchResults count] == 0) {
+        cell.textLabel.text = @"(Nothing found)";
+        cell.detailTextLabel.text = @"";
+    } else {
+      SearchResult *searchResult = _searchResults[indexPath.row];
+      cell.textLabel.text = searchResult.name;
+      cell.detailTextLabel.text = searchResult.artistName;
+    }
   return cell;
+}
+
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    //  simply deselect the row with an animation,
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+- (NSIndexPath *)tableView:(UITableView *)tableView
+    willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+  // makes sure that you can only select rows with actual search results.
+  if ([_searchResults count] == 0) {
+    return nil;
+  } else {
+    return indexPath;
+  }
 }
 
 #pragma mark - UISearchBarDelegate
@@ -90,16 +115,19 @@
    [searchBar resignFirstResponder];
   //allocate a new NSMutableArray object and put it into the _searchResults instance variable. This is done each time the user performs a search.
   _searchResults = [NSMutableArray arrayWithCapacity:10];
-  // You add a string with some text into the array. Just for the fun of it, that is repeated 3 times so your data model will have three rows in it.
-  for (int i = 0; i < 3; i++) {
-      // creates the new SearchResult object and simply puts some fake text into its name and artistName properties.
-      SearchResult *searchResult = [[SearchResult alloc] init];
-      searchResult.name = [NSString stringWithFormat: @"Fake Result %d for", i];
-      searchResult.artistName = searchBar.text;
-      [_searchResults addObject:searchResult];
+  // You have added an if-statement that compares the search text to @"justin bieber". Only if there is no match will this create the SearchResult objects and add them to the array.
+  if (![searchBar.text isEqualToString:@"justin bieber"]) {
+      // You add a string with some text into the array. Just for the fun of it, that is repeated 3 times so your data model will have three rows in it.
+      for (int i = 0; i < 3; i++) {
+          // creates the new SearchResult object and simply puts some fake text into its name and artistName properties.
+          SearchResult *searchResult = [[SearchResult alloc] init];
+          searchResult.name = [NSString stringWithFormat: @"Fake Result %d for", i];
+          searchResult.artistName = searchBar.text;
+          [_searchResults addObject:searchResult];
+      }
+  }
   // The last statement in the method reloads the table view to make the new rows visible, which means you have to adapt the table view data source methods to read from this array as well.
   [self.tableView reloadData];
-  }
 }
 
 // The search bar has an ugly white gap above it. This removes it
