@@ -8,6 +8,7 @@
 
 #import "SearchViewController.h"
 #import "SearchResult.h"
+#import "SearchResultCell.h"
 
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
@@ -43,6 +44,13 @@
     // This tells the table view to add a 64-point margin at the top, made up of 20 points for the status bar and 44 points for the Search Bar. Now the first row will always be visible, and when you scroll the table view the cells still go under the search bar. Nice.
     // Before putting this, the top cells in the table view were cut off.
     self.tableView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0);
+    
+    // The UINib class is used to load nibs. Here you tell it to load the nib you just created (note that you don’t specify the .xib file extension). Then you ask the table view to register this nib for the reuse identifier “SearchResultCell”.
+    UINib *cellNib = [UINib nibWithNibName:@"SearchResultCell" bundle:nil];
+    [self.tableView registerNib:cellNib forCellReuseIdentifier:@"SearchResultCell"];
+    
+    // adjust the row height
+    self.tableView.rowHeight = 80;
 }
 
 - (void)didReceiveMemoryWarning
@@ -67,24 +75,16 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  // You create a UITableViewCell by hand and put the data for this row into its text label.
-  static NSString *CellIdentifier = @"SearchResultCell";
-  UITableViewCell *cell =
-      [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-  if (cell == nil) {
-  // What is UITableViewCellStyleSubtitle?
-  // Instead of a regular table view cell this is now using a “subtitle” cell style
-    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
-                                  reuseIdentifier:CellIdentifier];
+  SearchResultCell *cell = (SearchResultCell *)
+      [tableView dequeueReusableCellWithIdentifier:@"SearchResultCell"];
+  if ([_searchResults count] == 0) {
+    cell.nameLabel.text = @"(Nothing found)";
+    cell.artistNameLabel.text = @"";
+  } else {
+    SearchResult *searchResult = _searchResults[indexPath.row];
+    cell.nameLabel.text = searchResult.name;
+    cell.artistNameLabel.text = searchResult.artistName;
   }
-    if ([_searchResults count] == 0) {
-        cell.textLabel.text = @"(Nothing found)";
-        cell.detailTextLabel.text = @"";
-    } else {
-      SearchResult *searchResult = _searchResults[indexPath.row];
-      cell.textLabel.text = searchResult.name;
-      cell.detailTextLabel.text = searchResult.artistName;
-    }
   return cell;
 }
 
