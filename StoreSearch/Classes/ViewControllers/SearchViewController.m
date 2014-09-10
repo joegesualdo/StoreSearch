@@ -10,6 +10,10 @@
 #import "SearchResult.h"
 #import "SearchResultCell.h"
 
+// This defines a symbolic name, SearchResultCellIdentifier, with the value @"SearchResultCell". Should you want to change this value, then you only have to do it here and any code that uses SearchResultCellIdentifier will be automatically updated.
+// There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
+static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
+
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 
@@ -46,8 +50,8 @@
     self.tableView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0);
     
     // The UINib class is used to load nibs. Here you tell it to load the nib you just created (note that you don’t specify the .xib file extension). Then you ask the table view to register this nib for the reuse identifier “SearchResultCell”.
-    UINib *cellNib = [UINib nibWithNibName:@"SearchResultCell" bundle:nil];
-    [self.tableView registerNib:cellNib forCellReuseIdentifier:@"SearchResultCell"];
+    UINib *cellNib = [UINib nibWithNibName:SearchResultCellIdentifier bundle:nil];
+    [self.tableView registerNib:cellNib forCellReuseIdentifier:SearchResultCellIdentifier];
     
     // adjust the row height
     self.tableView.rowHeight = 80;
@@ -76,7 +80,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   SearchResultCell *cell = (SearchResultCell *)
-      [tableView dequeueReusableCellWithIdentifier:@"SearchResultCell"];
+      [tableView dequeueReusableCellWithIdentifier:SearchResultCellIdentifier];
   if ([_searchResults count] == 0) {
     cell.nameLabel.text = @"(Nothing found)";
     cell.artistNameLabel.text = @"";
