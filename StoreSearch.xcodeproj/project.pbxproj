@@ -12,6 +12,8 @@
 		3FCCBE19749B4278BEA2E48D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B78F8CF6B4C9439B90D233EF /* AppDelegate.m */; };
 		8439B6606FFE49A580DA59DD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDFB7A821FFB443CB32596BD /* Foundation.framework */; };
 		E6BC37C3FF21492BA5B04D97 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F3FEA816FC497D8BDAEFCE /* main.m */; };
+		E911D18819C00529002EE72D /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E911D18619C00529002EE72D /* SearchViewController.m */; };
+		E911D18919C00529002EE72D /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E911D18719C00529002EE72D /* SearchViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,9 @@
 		9337BF3783C146FCAFB40954 /* StoreSearch-Prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "StoreSearch-Prefix.pch"; sourceTree = "<group>"; };
 		B78F8CF6B4C9439B90D233EF /* AppDelegate.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		D3F3FEA816FC497D8BDAEFCE /* main.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		E911D18519C00529002EE72D /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
+		E911D18619C00529002EE72D /* SearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchViewController.m; sourceTree = "<group>"; };
+		E911D18719C00529002EE72D /* SearchViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SearchViewController.xib; path = ../../Classes/ViewControllers/SearchViewController.xib; sourceTree = "<group>"; };
 		EDFB7A821FFB443CB32596BD /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		F98F0C91CB4C49BB8F1272C8 /* libPods-unit_tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-unit_tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -139,6 +144,7 @@
 		634853336E8440B7B9BEEC6D /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				E911D18419C00500002EE72D /* Search */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -155,6 +161,7 @@
 		7A4026F23E9F4B5EB908460E /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
+				E911D18719C00529002EE72D /* SearchViewController.xib */,
 			);
 			path = Nibs;
 			sourceTree = "<group>";
@@ -225,6 +232,15 @@
 				F98F0C91CB4C49BB8F1272C8 /* libPods-unit_tests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E911D18419C00500002EE72D /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				E911D18519C00529002EE72D /* SearchViewController.h */,
+				E911D18619C00529002EE72D /* SearchViewController.m */,
+			);
+			name = Search;
 			sourceTree = "<group>";
 		};
 		EE974F081ED84CA1BE8E82E0 /* iOS */ = {
@@ -323,6 +339,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E911D18919C00529002EE72D /* SearchViewController.xib in Resources */,
 				04A77FFEC7674C3B887BA236 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -382,6 +399,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3FCCBE19749B4278BEA2E48D /* AppDelegate.m in Sources */,
+				E911D18819C00529002EE72D /* SearchViewController.m in Sources */,
 				E6BC37C3FF21492BA5B04D97 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
