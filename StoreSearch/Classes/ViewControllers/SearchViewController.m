@@ -7,6 +7,7 @@
 //
 
 #import "SearchViewController.h"
+#import "SearchResult.h"
 
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
@@ -68,10 +69,15 @@
   UITableViewCell *cell =
       [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
   if (cell == nil) {
-    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault
+  // What is UITableViewCellStyleSubtitle?
+  // Instead of a regular table view cell this is now using a “subtitle” cell style
+    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle
                                   reuseIdentifier:CellIdentifier];
   }
-  cell.textLabel.text = _searchResults[indexPath.row];
+  SearchResult *searchResult = _searchResults[indexPath.row];
+  cell.textLabel.text = searchResult.name;
+  cell.detailTextLabel.text = searchResult.artistName;
+
   return cell;
 }
 
@@ -86,9 +92,11 @@
   _searchResults = [NSMutableArray arrayWithCapacity:10];
   // You add a string with some text into the array. Just for the fun of it, that is repeated 3 times so your data model will have three rows in it.
   for (int i = 0; i < 3; i++) {
-    [_searchResults
-        addObject:[NSString stringWithFormat:@"Fake Result %d for '%@'", i,
-                                             searchBar.text]];
+      // creates the new SearchResult object and simply puts some fake text into its name and artistName properties.
+      SearchResult *searchResult = [[SearchResult alloc] init];
+      searchResult.name = [NSString stringWithFormat: @"Fake Result %d for", i];
+      searchResult.artistName = searchBar.text;
+      [_searchResults addObject:searchResult];
   // The last statement in the method reloads the table view to make the new rows visible, which means you have to adapt the table view data source methods to read from this array as well.
   [self.tableView reloadData];
   }
