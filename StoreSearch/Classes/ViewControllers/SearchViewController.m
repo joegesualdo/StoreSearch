@@ -13,6 +13,7 @@
 // This defines a symbolic name, SearchResultCellIdentifier, with the value @"SearchResultCell". Should you want to change this value, then you only have to do it here and any code that uses SearchResultCellIdentifier will be automatically updated.
 // There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
 static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
+static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
@@ -53,6 +54,9 @@ static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
     UINib *cellNib = [UINib nibWithNibName:SearchResultCellIdentifier bundle:nil];
     [self.tableView registerNib:cellNib forCellReuseIdentifier:SearchResultCellIdentifier];
     
+    cellNib = [UINib nibWithNibName:NothingFoundCellIdentifier bundle:nil];
+    [self.tableView registerNib:cellNib forCellReuseIdentifier:NothingFoundCellIdentifier];
+    
     // adjust the row height
     self.tableView.rowHeight = 80;
 }
@@ -79,19 +83,20 @@ static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  SearchResultCell *cell = (SearchResultCell *)
-      [tableView dequeueReusableCellWithIdentifier:SearchResultCellIdentifier];
+  // only make a SearchResultCell if there are actually any results. If the array is empty, you’ll simply dequeue the cell for the NothingFoundCellIdentifier and return it
   if ([_searchResults count] == 0) {
-    cell.nameLabel.text = @"(Nothing found)";
-    cell.artistNameLabel.text = @"";
+    return [tableView dequeueReusableCellWithIdentifier:NothingFoundCellIdentifier
+                                        forIndexPath:indexPath];
   } else {
+    SearchResultCell *cell = (SearchResultCell *)
+        [tableView dequeueReusableCellWithIdentifier:SearchResultCellIdentifier
+                                        forIndexPath:indexPath];
     SearchResult *searchResult = _searchResults[indexPath.row];
     cell.nameLabel.text = searchResult.name;
     cell.artistNameLabel.text = searchResult.artistName;
+    return cell;
   }
-  return cell;
 }
-
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
