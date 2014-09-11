@@ -125,21 +125,9 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
                                         forIndexPath:indexPath];
     NSUInteger row = (NSUInteger) indexPath.row;
     SearchResult *searchResult = _searchResults[row];
-    cell.nameLabel.text = searchResult.name;
       
-    NSString *artistName = searchResult.artistName;
-      
-    // check that the SearchResult’s artistName is not nil.
-    if (artistName == nil) {
-      // if it's nil, make the cell say “Unknown”
-      artistName = @"Unknown";
-    }
-      
-    // You also add the value of the kind property to the artist name label, which should tell the user what kind of product they’re looking at:
-    // We created the kindForDisplay below
-    NSString *kind = [self kindForDisplay:searchResult.kind];
-    cell.artistNameLabel.text = [NSString stringWithFormat:
-                               @"%@ (%@)", artistName, kind];
+    // we now configure the cell with the method we created in SearchREsultCell
+    [cell configureForSearchResult:searchResult];
       
     return cell;
   }
@@ -361,34 +349,6 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
   searchResult.genre =
       [(NSArray *)dictionary[@"genres"] componentsJoinedByString:@", "];
   return searchResult;
-}
-
-//  The value of kind comes straight from the server and it is more of an internal name than something you’d want to show directly to the user.
-// This helper lets us change the name for kind
-- (NSString *)kindForDisplay:(NSString *)kind {
-  if ([kind isEqualToString:@"album"]) {
-    return @"Album";
-  } else if ([kind isEqualToString:@"audiobook"]) {
-    return @"Audio Book";
-  } else if ([kind isEqualToString:@"book"]) {
-    return @"Book";
-  } else if ([kind isEqualToString:@"ebook"]) {
-    return @"E-Book";
-  } else if ([kind isEqualToString:@"feature-movie"]) {
-    return @"Movie";
-  } else if ([kind isEqualToString:@"music-video"]) {
-    return @"Music Video";
-  } else if ([kind isEqualToString:@"podcast"]) {
-    return @"Podcast";
-  } else if ([kind isEqualToString:@"software"]) {
-    return @"App";
-  } else if ([kind isEqualToString:@"song"]) {
-    return @"Song";
-  } else if ([kind isEqualToString:@"tv-episode"]) {
-    return @"TV Episode";
-  } else {
-    return kind;
-  }
 }
 
 // We hookup the segment control up to this IBAction, so whenever the tab changes, this method is called

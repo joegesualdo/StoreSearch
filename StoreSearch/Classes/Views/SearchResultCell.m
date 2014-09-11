@@ -7,6 +7,9 @@
 //
 
 #import "SearchResultCell.h"
+#import "SearchResult.h"
+// Remember that a category can be used to extend the functionality of an existing class and that’s exactly what AFNetworking’s developers did. Because loading images and showing them in UIImageViews is a very common thing, they provided this really convenient category that lets you pull this off with just one line of code.
+#import <AFNetworking/UIImageView+AFNetworking.h>
 
 @implementation SearchResultCell
 
@@ -40,6 +43,49 @@
                                                  alpha:0.5f];
     // This will set the view we created as the background, so this will be the background when we select a cell, instea of the standard gray
   self.selectedBackgroundView = selectedView;
+}
+
+- (void)configureForSearchResult:(SearchResult *)searchResult {
+  self.nameLabel.text = searchResult.name;
+  NSString *artistName = searchResult.artistName;
+  if (artistName == nil) {
+    artistName = @"Unknown";
+  }
+  NSString *kind = [self kindForDisplay:searchResult.kind];
+  self.artistNameLabel.text =
+      [NSString stringWithFormat:@"%@ (%@)", artistName, kind];
+    
+  // This tells AFNetworking to load the image from artworkURL60 and to place it in the cell’s image view. While the image is loading the image view displays the placeholder image that you added to the asset catalog earlier.
+  [self.artworkImageView setImageWithURL:
+   [NSURL URLWithString:searchResult.artworkURL60] placeholderImage:[UIImage imageNamed:@"Placeholder"]];
+}
+
+//  The value of kind comes straight from the server and it is more of an internal name than something you’d want to show directly to the user.
+// This helper lets us change the name for kind
+- (NSString *)kindForDisplay:(NSString *)kind {
+  if ([kind isEqualToString:@"album"]) {
+    return @"Album";
+  } else if ([kind isEqualToString:@"audiobook"]) {
+    return @"Audio Book";
+  } else if ([kind isEqualToString:@"book"]) {
+    return @"Book";
+  } else if ([kind isEqualToString:@"ebook"]) {
+    return @"E-Book";
+  } else if ([kind isEqualToString:@"feature-movie"]) {
+    return @"Movie";
+  } else if ([kind isEqualToString:@"music-video"]) {
+    return @"Music Video";
+  } else if ([kind isEqualToString:@"podcast"]) {
+    return @"Podcast";
+  } else if ([kind isEqualToString:@"software"]) {
+    return @"App";
+  } else if ([kind isEqualToString:@"song"]) {
+    return @"Song";
+  } else if ([kind isEqualToString:@"tv-episode"]) {
+    return @"TV Episode";
+  } else {
+    return kind;
+  }
 }
 
 @end
