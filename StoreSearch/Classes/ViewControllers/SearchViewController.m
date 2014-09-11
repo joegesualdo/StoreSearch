@@ -80,7 +80,7 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     } else if ([_searchResults count] == 0) {
         return 1;
     } else {
-        return [_searchResults count];
+        return (int)[_searchResults count];
     }
 }
 
@@ -94,7 +94,8 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     SearchResultCell *cell = (SearchResultCell *)
         [tableView dequeueReusableCellWithIdentifier:SearchResultCellIdentifier
                                         forIndexPath:indexPath];
-    SearchResult *searchResult = _searchResults[indexPath.row];
+    NSUInteger row = (NSUInteger) indexPath.row;
+    SearchResult *searchResult = _searchResults[row];
     cell.nameLabel.text = searchResult.name;
     cell.artistNameLabel.text = searchResult.artistName;
     return cell;
