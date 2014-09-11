@@ -25,6 +25,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 // Answer: Views are always part of a view hierarchy and they will always have an owner with a strong pointer: their superview. In this screen, the SearchViewController’s main view object will hold a reference to both the search bar and the table view. This is done inside UIKit and you don’t have to worry about it. As long as the view controller exists, so will these two outlets.
 @property (nonatomic, weak) IBOutlet UISearchBar *searchBar;
 @property (nonatomic, weak) IBOutlet UITableView *tableView;
+@property (nonatomic, weak) IBOutlet UISegmentedControl *segmentedControl;
 
 
 @end
@@ -55,7 +56,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     
     // This tells the table view to add a 64-point margin at the top, made up of 20 points for the status bar and 44 points for the Search Bar. Now the first row will always be visible, and when you scroll the table view the cells still go under the search bar. Nice.
     // Before putting this, the top cells in the table view were cut off.
-    self.tableView.contentInset = UIEdgeInsetsMake(64, 0, 0, 0);
+    // This 108 inset, leaves a margin on top so the navbar wont cover any cells
+    self.tableView.contentInset = UIEdgeInsetsMake(108, 0, 0, 0);
     
     // The UINib class is used to load nibs. Here you tell it to load the nib you just created (note that you don’t specify the .xib file extension). Then you ask the table view to register this nib for the reuse identifier “SearchResultCell”.
     UINib *cellNib = [UINib nibWithNibName:SearchResultCellIdentifier bundle:nil];
@@ -167,8 +169,13 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 // this delegate method will will put some fake data into this array and then use it to fill up the table.
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-  if ([searchBar.text length] > 0) {
-    [searchBar resignFirstResponder];
+    [self performSearch];
+}
+
+-(void)performSearch
+{
+  if ([self.searchBar.text length] > 0) {
+    [self.searchBar resignFirstResponder];
       
     // Every time the user performs a new search you cancel the previous request
     // cancel everything that is in a que
@@ -176,7 +183,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     _isLoading = YES;
     [self.tableView reloadData];
     _searchResults = [NSMutableArray arrayWithCapacity:10];
-    NSURL *url = [self urlWithSearchText:searchBar.text];
+    NSURL *url = [self urlWithSearchText:self.searchBar.text category:self.segmentedControl.selectedSegmentIndex];
     // After you’ve created the NSURL object like before, you now put it into an NSURLRequest object.
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     //  You use that request object to create a new AFHTTPRequestOperation object.
@@ -213,13 +220,36 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
   }
 }
 
-- (NSURL *)urlWithSearchText:(NSString *)searchText {
+
+- (NSURL *)urlWithSearchText:(NSString *)searchText category:(NSInteger)category
+{
+  NSString *categoryName;
+    
+  // This first turns the category index from a number into a string. (Note that the category index is passed to the method as a new parameter.)
+  switch (category) {
+    // For the first tab  of the segmented control -- "ALL"
+    case 0:
+      categoryName = @"";
+      break;
+    // For the second tab  of the segmented control -- "Music"
+    case 1:
+      categoryName = @"musicTrack";
+      break;
+    // For the third tab  of the segmented control -- "Software"
+    case 2:
+      categoryName = @"software";
+      break;
+    // For the fourth tab  of the segmented control -- "E-books"
+    case 3:
+      categoryName = @"ebook";
+      break;
+  }
   //  A space is not a valid character in a URL. Many other characters aren’t valid either (such as the < or > signs) and therefore must be escaped. Another term for this is URL encoding. A space, for example, can be encoded as the + sign (you did that earlier when you typed the URL into the web browser) or as the character sequence %20.
   // Fortunately, NSString can do this encoding already,
     // stringbyAddingPercentEscapesUsingEcoding method escaped all the spaces by putting %20
   NSString *escapedSearchText = [searchText stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    NSString *urlString = [NSString
-      stringWithFormat:@"http://itunes.apple.com/search?term=%@&limit=4000", escapedSearchText];
+  NSString *urlString = [NSString
+      stringWithFormat:@"http://itunes.apple.com/search?term=%@&limit=200&entity=%@", escapedSearchText, categoryName];
   // This creates a url object by passing it the url string
   NSURL *url = [NSURL URLWithString:urlString];
   // retuns the url obect
@@ -360,4 +390,14 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     return kind;
   }
 }
+
+// We hookup the segment control up to this IBAction, so whenever the tab changes, this method is called
+- (IBAction)segmentChanged:(UISegmentedControl *)sender {
+// The app will always call performSearch if the user presses the Search button on the keyboard, but in the case of tapping on the Segmented Control it will only do a new search if the user has already performed a search before.
+  if (_searchResults != nil) {
+    [self performSearch];
+  }
+    NSLog(@"Woooo");
+}
+
 @end
