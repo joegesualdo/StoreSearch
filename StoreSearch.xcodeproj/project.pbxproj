@@ -11,6 +11,7 @@
 		258F2FCCDE504A6FA6EBA8B8 /* libPods-unit_tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F98F0C91CB4C49BB8F1272C8 /* libPods-unit_tests.a */; };
 		3FCCBE19749B4278BEA2E48D /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B78F8CF6B4C9439B90D233EF /* AppDelegate.m */; };
 		8439B6606FFE49A580DA59DD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EDFB7A821FFB443CB32596BD /* Foundation.framework */; };
+		D805DBDD3CCA4D629C13AA46 /* libPods-StoreSearch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 12968DBAA49D4CE3B9A6ECA1 /* libPods-StoreSearch.a */; };
 		E6BC37C3FF21492BA5B04D97 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F3FEA816FC497D8BDAEFCE /* main.m */; };
 		E911D18819C00529002EE72D /* SearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E911D18619C00529002EE72D /* SearchViewController.m */; };
 		E911D18919C00529002EE72D /* SearchViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E911D18719C00529002EE72D /* SearchViewController.xib */; };
@@ -33,6 +34,7 @@
 
 /* Begin PBXFileReference section */
 		11FA1A1BC3AA440997FB229F /* UnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		12968DBAA49D4CE3B9A6ECA1 /* libPods-StoreSearch.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-StoreSearch.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B445FF3DA8A40A68D6BD048 /* UnitTests-Prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "UnitTests-Prefix.pch"; sourceTree = "<group>"; };
 		4D5DD63AB05246A1A739C524 /* AppDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		5200B0CF765B4E48BAA06E48 /* Images.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -42,6 +44,7 @@
 		849349E28F5749FCB62E85BF /* Pods-unit_tests.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-unit_tests.xcconfig"; path = "Pods/Pods-unit_tests.xcconfig"; sourceTree = "<group>"; };
 		9337BF3783C146FCAFB40954 /* StoreSearch-Prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "StoreSearch-Prefix.pch"; sourceTree = "<group>"; };
 		B78F8CF6B4C9439B90D233EF /* AppDelegate.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		C8F32C088815449B823CC216 /* Pods-StoreSearch.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StoreSearch.xcconfig"; path = "Pods/Pods-StoreSearch.xcconfig"; sourceTree = "<group>"; };
 		D3F3FEA816FC497D8BDAEFCE /* main.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E911D18519C00529002EE72D /* SearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchViewController.h; sourceTree = "<group>"; };
 		E911D18619C00529002EE72D /* SearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchViewController.m; sourceTree = "<group>"; };
@@ -71,6 +74,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8439B6606FFE49A580DA59DD /* Foundation.framework in Frameworks */,
+				D805DBDD3CCA4D629C13AA46 /* libPods-StoreSearch.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +100,7 @@
 				E5BE6625E2C147F3B6A8C83A /* Frameworks */,
 				DEA6747B4DA44BD387C5E4C9 /* Products */,
 				849349E28F5749FCB62E85BF /* Pods-unit_tests.xcconfig */,
+				C8F32C088815449B823CC216 /* Pods-StoreSearch.xcconfig */,
 			);
 			indentWidth = 4;
 			sourceTree = "<group>";
@@ -246,6 +251,7 @@
 			children = (
 				EE974F081ED84CA1BE8E82E0 /* iOS */,
 				F98F0C91CB4C49BB8F1272C8 /* libPods-unit_tests.a */,
+				12968DBAA49D4CE3B9A6ECA1 /* libPods-StoreSearch.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -320,10 +326,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4080251C6F8E49BD971E19D1 /* Build configuration list for PBXNativeTarget "StoreSearch" */;
 			buildPhases = (
+				3452730DDE864253981C0F78 /* Check Pods Manifest.lock */,
 				3393B6CE976540578383004D /* Sources */,
 				3817C298880D46C483AAF8A6 /* Frameworks */,
 				B94C008A187D427FA73A9190 /* Resources */,
 				75FBE635B277417386121893 /* Warn for TODO and FIXME comments */,
+				408DFEEAAD1640A29D9C6EF3 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -398,6 +406,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Pods-unit_tests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		3452730DDE864253981C0F78 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		408DFEEAAD1640A29D9C6EF3 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-StoreSearch-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		75FBE635B277417386121893 /* Warn for TODO and FIXME comments */ = {
@@ -606,6 +644,7 @@
 		};
 		7B63ADA301464BD2949ACB9B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C8F32C088815449B823CC216 /* Pods-StoreSearch.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
@@ -631,6 +670,7 @@
 		};
 		C578746500804F129B7622D5 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C8F32C088815449B823CC216 /* Pods-StoreSearch.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
