@@ -23,9 +23,21 @@
                                              bundle:nil];
     // set the root view controller as the root controller
   self.window.rootViewController = self.searchViewController;
+    
+  [self customizeAppearance];
+    
   //make the window and everything in it visible.
   [self.window makeKeyAndVisible];
   return YES;
+}
+
+- (void)customizeAppearance {
+    // [UIColor colorWithRed:green:blue:alpha:] method makes a new UIColor object based on the RGB and alpha color components that you specify.
+    // Why do you divide by 255.0f?
+    // Many painting programs let you pick RGB values going from 0 to 255 so that’s the range of color values that many programmers are accustomed to thinking in. The UIColor method, however, accepts values between 0.0 and 1.0, so you have to divide these numbers by 255.0 to scale them down to that range.
+    UIColor *barTintColor = [UIColor colorWithRed:20/255.0f green:160/255.0f blue:160/255.0f alpha:1.0f];
+    [[UISearchBar appearance] setBarTintColor:barTintColor];
+    self.window.tintColor = [UIColor colorWithRed:10/255.0f green:80/255.0f blue:80/255.0f alpha:1.0f];
 }
 
 @end
