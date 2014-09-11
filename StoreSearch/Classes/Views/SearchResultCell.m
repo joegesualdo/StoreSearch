@@ -88,4 +88,17 @@
   }
 }
 
+//Remember that table view cells can be reused, so it’s theoretically possible that you’re scrolling through the table and some cell is about to be reused while its previous image is still loading. You no longer need that image so you should really cancel the pending download. Table view cells have a special method named prepareForReuse that is ideal for this.
+// prepareForResuse is called every time we are about to reuse a cell
+// Here you cancel any image download that is still in progress and for good measure you also clear out the text from the labels. It’s always a good idea to play nice.
+- (void)prepareForReuse {
+  [super prepareForReuse];
+  // this will cancel the image request from the last cell if it wasn't fulfilled yet. This way we don't have this old image overriding our new one
+  [self.artworkImageView cancelImageRequestOperation];
+  // resets nameLable text to nothing
+  self.nameLabel.text = nil;
+  // resets artistNameLabel text to nothing
+  self.artistNameLabel.text = nil;
+}
+
 @end
