@@ -169,6 +169,10 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 {
   if ([searchBar.text length] > 0) {
     [searchBar resignFirstResponder];
+      
+    // Every time the user performs a new search you cancel the previous request
+    // cancel everything that is in a que
+    [_queue cancelAllOperations];
     _isLoading = YES;
     [self.tableView reloadData];
     _searchResults = [NSMutableArray arrayWithCapacity:10];
@@ -193,6 +197,11 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
         [self.tableView reloadData];
     } failure:^(AFHTTPRequestOperation *operation,
                 NSError *error) {
+        
+        // Canceling an AFHTTPRequestOperation invokes its failure block, so add these lines to the failure block to prevent the app from showing an error message. Becuase above, if you user searched for something else before the results are returned, the operation is cancelled
+        if (operation.isCancelled) {
+          return;
+        }
         // howNetworkError message to tell the user that something went wrong.
         [self showNetworkError];
         //hide the loading cell
