@@ -15,6 +15,7 @@
 static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
 static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 
+
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 
@@ -122,25 +123,48 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 #pragma mark - UISearchBarDelegate
 // is invoked when the user taps the Search button on the keyboard.
 
+
 // this delegate method will will put some fake data into this array and then use it to fill up the table.
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
   // tells the UISearchBar that it should no longer listen to keyboard input and as a result, the keyboard will hide itself until you tap inside the search bar again.
    [searchBar resignFirstResponder];
   //allocate a new NSMutableArray object and put it into the _searchResults instance variable. This is done each time the user performs a search.
   _searchResults = [NSMutableArray arrayWithCapacity:10];
-  // You have added an if-statement that compares the search text to @"justin bieber". Only if there is no match will this create the SearchResult objects and add them to the array.
-  if (![searchBar.text isEqualToString:@"justin bieber"]) {
-      // You add a string with some text into the array. Just for the fun of it, that is repeated 3 times so your data model will have three rows in it.
-      for (int i = 0; i < 3; i++) {
-          // creates the new SearchResult object and simply puts some fake text into its name and artistName properties.
-          SearchResult *searchResult = [[SearchResult alloc] init];
-          searchResult.name = [NSString stringWithFormat: @"Fake Result %d for", i];
-          searchResult.artistName = searchBar.text;
-          [_searchResults addObject:searchResult];
-      }
+    
+  // we defined this urlWithSearchText below
+  NSURL *url = [self urlWithSearchText:searchBar.text];
+  // We defined this performStoreRequestWithURL below
+  NSString *jsonString = [self performStoreRequestWithURL:url];
+    
+  if (jsonString == nil) {
+    [self showNetworkError];
+    return;
   }
-  // The last statement in the method reloads the table view to make the new rows visible, which means you have to adapt the table view data source methods to read from this array as well.
+    
+  // this will convert the jsonString to a dictionary
+  NSDictionary *dictionary = [self parseJSON:jsonString];
+
+  if (dictionary == nil) {
+    [self showNetworkError];
+    return;
+  }
+    
+  NSLog(@"Dictionary '%@'", dictionary);
+    
   [self.tableView reloadData];
+}
+
+- (NSURL *)urlWithSearchText:(NSString *)searchText {
+  //  A space is not a valid character in a URL. Many other characters aren’t valid either (such as the < or > signs) and therefore must be escaped. Another term for this is URL encoding. A space, for example, can be encoded as the + sign (you did that earlier when you typed the URL into the web browser) or as the character sequence %20.
+  // Fortunately, NSString can do this encoding already,
+    // stringbyAddingPercentEscapesUsingEcoding method escaped all the spaces by putting %20
+  NSString *escapedSearchText = [searchText stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *urlString = [NSString
+      stringWithFormat:@"http://itunes.apple.com/search?term=%@", escapedSearchText];
+  // This creates a url object by passing it the url string
+  NSURL *url = [NSURL URLWithString:urlString];
+  // retuns the url obect
+  return url;
 }
 
 // The search bar has an ugly white gap above it. This removes it
@@ -149,5 +173,55 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
   return UIBarPositionTopAttached;
 }
 
+// takes the NSURL object as a parameter and returns the JSON data that is received from the server.
+- (NSString *)performStoreRequestWithURL:(NSURL *)url {
+  NSError *error;
+  // a convenience constructor of the NSString class that returns a new string object with the data that it receives from the server at the other end of the URL. If something goes wrong, the string is nil and the NSError variable contains more details about the error.
+  NSString *resultString =
+      [NSString stringWithContentsOfURL:url
+                               encoding:NSUTF8StringEncoding
+                                  error:&error];
+  if (resultString == nil) {
+    NSLog(@"Download Error: %@", error);
+    return nil;
+  }
+  return resultString;
+}
+
+// This will convert a json string to a json object
+- (NSDictionary *)parseJSON:(NSString *)jsonString {
+  // Because the JSON data is actually in the form of a string, you have to put it into an NSData object first.
+  NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+  NSError *error;
+  //  NSJSONSerialization class here to convert the JSON search results to an NSDictionary.
+  id resultObject = [NSJSONSerialization JSONObjectWithData:data
+                                                    options:kNilOptions
+                                                      error:&error];
+  if (resultObject == nil) {
+    NSLog(@"JSON Error: %@", error);
+    return nil;
+  }
+    
+// Just because NSJSONSerialization was able to turn the string into valid Objective-C objects, doesn’t mean that it returns an NSDictionary! It could have returned an NSArray or even an NSString or NSNumber... In the case of the iTunes store web service, the top-level object should be an NSDictionary, but you can’t control what happens on the server. If for some reason the server programmers decide to put [ ] brackets around the JSON data, then the top-level object will no longer be an NSDictionary but an NSArray.
+  if (![resultObject isKindOfClass:[NSDictionary class]]) {
+    NSLog(@"JSON Error: Expected dictionary");
+    return nil;
+  }
+    
+  return resultObject;
+}
+
+// Helper that creates and shows up alert
+// We use this when our requests don;t work
+- (void)showNetworkError {
+  UIAlertView *alertView =
+      [[UIAlertView alloc] initWithTitle:@"Whoops..."
+                                 message:@"There was an error reading from the "
+                                         @"iTunes Store. Please try again."
+                                delegate:nil
+                       cancelButtonTitle:@"OK"
+                       otherButtonTitles:nil];
+  [alertView show];
+}
 
 @end
