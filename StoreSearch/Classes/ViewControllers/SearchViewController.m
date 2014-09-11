@@ -14,7 +14,7 @@
 // There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
 static NSString * const SearchResultCellIdentifier = @"SearchResultCell";
 static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
-
+static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 // hook up the data source and delegate protocols yourself.
 @interface SearchViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
@@ -32,6 +32,8 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 {
     // instance variables
     NSMutableArray *_searchResults;
+    // tells if the search is loading
+    BOOL _isLoading;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -58,6 +60,9 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     cellNib = [UINib nibWithNibName:NothingFoundCellIdentifier bundle:nil];
     [self.tableView registerNib:cellNib forCellReuseIdentifier:NothingFoundCellIdentifier];
     
+    cellNib = [UINib nibWithNibName:LoadingCellIdentifier bundle:nil];
+    [self.tableView registerNib:cellNib forCellReuseIdentifier:LoadingCellIdentifier];
+    
     // adjust the row height
     self.tableView.rowHeight = 80;
     
@@ -75,7 +80,11 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 
 - (NSInteger)tableView:(UITableView *)tableView
     numberOfRowsInSection:(NSInteger)section {
-    if (_searchResults == nil) {
+    
+    // If results are loading, return once cell, because that cell wll have the "Loading" symbl
+    if (_isLoading) {
+        return 1;
+    }else if (_searchResults == nil) {
         return 0;
     // If there are no results this now returns 1, for the row with the text “(Nothing Found)”.
     } else if ([_searchResults count] == 0) {
@@ -88,7 +97,20 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath {
   // only make a SearchResultCell if there are actually any results. If the array is empty, you’ll simply dequeue the cell for the NothingFoundCellIdentifier and return it
-  if ([_searchResults count] == 0) {
+    
+  // search results are loading, we will show the Loading cell
+    NSLog(@"_isLoading -- %hhd", _isLoading);
+  if (_isLoading) {
+      UITableViewCell *cell = [tableView
+                               dequeueReusableCellWithIdentifier:LoadingCellIdentifier
+                               forIndexPath:indexPath];
+      // It also looks up the UIActivityIndicatorView by its tag
+      UIActivityIndicatorView *spinner =
+      (UIActivityIndicatorView *)[cell viewWithTag:100];
+      // tells the spinner to start animating.
+      [spinner startAnimating];
+      return cell;
+  }else if ([_searchResults count] == 0) {
     return [tableView dequeueReusableCellWithIdentifier:NothingFoundCellIdentifier
                                         forIndexPath:indexPath];
   } else {
@@ -126,8 +148,8 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 
 - (NSIndexPath *)tableView:(UITableView *)tableView
     willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-  // makes sure that you can only select rows with actual search results.
-  if ([_searchResults count] == 0) {
+  // makes sure that you can only select rows with actual search results, not the loading cell or nothing found cell
+  if ([_searchResults count] == 0 || _isLoading) {
     return nil;
   } else {
     return indexPath;
@@ -142,35 +164,54 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
   // tells the UISearchBar that it should no longer listen to keyboard input and as a result, the keyboard will hide itself until you tap inside the search bar again.
    [searchBar resignFirstResponder];
+    
+  // sets loading to YES before the request starts
+  _isLoading = YES;
+  [self.tableView reloadData];
+
   //allocate a new NSMutableArray object and put it into the _searchResults instance variable. This is done each time the user performs a search.
   _searchResults = [NSMutableArray arrayWithCapacity:10];
     
-  // we defined this urlWithSearchText below
-  NSURL *url = [self urlWithSearchText:searchBar.text];
-  // We defined this performStoreRequestWithURL below
-  NSString *jsonString = [self performStoreRequestWithURL:url];
-    
-  if (jsonString == nil) {
-    [self showNetworkError];
-    return;
-  }
-    
-  // this will convert the jsonString to a dictionary
-  NSDictionary *dictionary = [self parseJSON:jsonString];
+  // This creates a que
+  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
-  if (dictionary == nil) {
-    [self showNetworkError];
-    return;
-  }
-    
-  NSLog(@"Dictionary '%@'", dictionary);
-    
-  [self parseDictionary:dictionary];
-  
-  // sort the search results alphabetically. That’s quite easy, actually. NSMutableArray already has a method to sort itself. All you have to do is tell it what to sort on.
-  [_searchResults sortUsingSelector:@selector(compareName:)];
-    
-  [self.tableView reloadData];
+  // All of this code will be proccess on a background thread on the que we defined above
+  dispatch_async(queue, ^{
+      // we defined this urlWithSearchText below
+      NSURL *url = [self urlWithSearchText:searchBar.text];
+      // We defined this performStoreRequestWithURL below
+      NSString *jsonString = [self performStoreRequestWithURL:url];
+        
+      if (jsonString == nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [self showNetworkError];
+        });
+        return;
+      }
+        
+      // this will convert the jsonString to a dictionary
+      NSDictionary *dictionary = [self parseJSON:jsonString];
+
+      if (dictionary == nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [self showNetworkError];
+        });
+        return;
+      }
+        
+      NSLog(@"Dictionary '%@'", dictionary);
+        
+      [self parseDictionary:dictionary];
+      
+      // sort the search results alphabetically. That’s quite easy, actually. NSMutableArray already has a method to sort itself. All you have to do is tell it what to sort on.
+      [_searchResults sortUsingSelector:@selector(compareName:)];
+        
+      // sets loading to NO after the request is finished
+      dispatch_async(dispatch_get_main_queue(), ^{
+          _isLoading = NO;
+          [self.tableView reloadData];
+      });
+  });
 }
 
 - (NSURL *)urlWithSearchText:(NSString *)searchText {
@@ -179,7 +220,7 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     // stringbyAddingPercentEscapesUsingEcoding method escaped all the spaces by putting %20
   NSString *escapedSearchText = [searchText stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     NSString *urlString = [NSString
-      stringWithFormat:@"http://itunes.apple.com/search?term=%@", escapedSearchText];
+      stringWithFormat:@"http://itunes.apple.com/search?term=%@&limit=4000", escapedSearchText];
   // This creates a url object by passing it the url string
   NSURL *url = [NSURL URLWithString:urlString];
   // retuns the url obect
