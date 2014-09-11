@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Joe Gesualdo. All rights reserved.
 //
 
+#import <AFNetworking/AFNetworking.h>
 #import "SearchViewController.h"
 #import "SearchResult.h"
 #import "SearchResultCell.h"
@@ -34,13 +35,16 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     NSMutableArray *_searchResults;
     // tells if the search is loading
     BOOL _isLoading;
+    NSOperationQueue *_queue;
 }
 
+// In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+      // You will create this _queue object when the view controller gets instantiated, in other words in its init method.
+      _queue = [[NSOperationQueue alloc] init];
     }
     return self;
 }
@@ -161,57 +165,43 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 
 // this delegate method will will put some fake data into this array and then use it to fill up the table.
-- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
-  // tells the UISearchBar that it should no longer listen to keyboard input and as a result, the keyboard will hide itself until you tap inside the search bar again.
-   [searchBar resignFirstResponder];
-    
-  // sets loading to YES before the request starts
-  _isLoading = YES;
-  [self.tableView reloadData];
-
-  //allocate a new NSMutableArray object and put it into the _searchResults instance variable. This is done each time the user performs a search.
-  _searchResults = [NSMutableArray arrayWithCapacity:10];
-    
-  // This creates a que
-  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-
-  // All of this code will be proccess on a background thread on the que we defined above
-  dispatch_async(queue, ^{
-      // we defined this urlWithSearchText below
-      NSURL *url = [self urlWithSearchText:searchBar.text];
-      // We defined this performStoreRequestWithURL below
-      NSString *jsonString = [self performStoreRequestWithURL:url];
-        
-      if (jsonString == nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          [self showNetworkError];
-        });
-        return;
-      }
-        
-      // this will convert the jsonString to a dictionary
-      NSDictionary *dictionary = [self parseJSON:jsonString];
-
-      if (dictionary == nil) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          [self showNetworkError];
-        });
-        return;
-      }
-        
-      NSLog(@"Dictionary '%@'", dictionary);
-        
-      [self parseDictionary:dictionary];
-      
-      // sort the search results alphabetically. That’s quite easy, actually. NSMutableArray already has a method to sort itself. All you have to do is tell it what to sort on.
-      [_searchResults sortUsingSelector:@selector(compareName:)];
-        
-      // sets loading to NO after the request is finished
-      dispatch_async(dispatch_get_main_queue(), ^{
-          _isLoading = NO;
-          [self.tableView reloadData];
-      });
-  });
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+{
+  if ([searchBar.text length] > 0) {
+    [searchBar resignFirstResponder];
+    _isLoading = YES;
+    [self.tableView reloadData];
+    _searchResults = [NSMutableArray arrayWithCapacity:10];
+    NSURL *url = [self urlWithSearchText:searchBar.text];
+    // After you’ve created the NSURL object like before, you now put it into an NSURLRequest object.
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    //  You use that request object to create a new AFHTTPRequestOperation object.
+    AFHTTPRequestOperation *operation =
+        [[AFHTTPRequestOperation alloc] initWithRequest:request];
+    operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    // As you can see, AFHTTPRequestOperation takes two blocks, one for success and one for failure.
+    // The code in the success block is executed when everything goes right, while the code from the failure block gets executed if there is some problem making the request or when the response isn’t valid JSON.
+    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation * operation,
+                                               id responseObject) {
+        // This takes the object from the responseObject parameter, which is actually an NSDictionary, and calls parseDictionary: to turn its contents into SearchResult objects, just like you did before.
+        [self parseDictionary:responseObject];
+        // sort the results and put everything into the table.
+        [_searchResults sortUsingSelector:@selector(compareName:)];
+        //hide the loading cell
+        _isLoading = NO;
+        // reload table
+        [self.tableView reloadData];
+    } failure:^(AFHTTPRequestOperation *operation,
+                NSError *error) {
+        // howNetworkError message to tell the user that something went wrong.
+        [self showNetworkError];
+        //hide the loading cell
+        _isLoading = NO;
+        // reload table
+        [self.tableView reloadData];
+    }];
+    [_queue addOperation:operation];
+  }
 }
 
 - (NSURL *)urlWithSearchText:(NSString *)searchText {
@@ -231,44 +221,6 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 // This is part of the SearchBarDelegate protocol.
 - (UIBarPosition)positionForBar:(id<UIBarPositioning>)bar {
   return UIBarPositionTopAttached;
-}
-
-// takes the NSURL object as a parameter and returns the JSON data that is received from the server.
-- (NSString *)performStoreRequestWithURL:(NSURL *)url {
-  NSError *error;
-  // a convenience constructor of the NSString class that returns a new string object with the data that it receives from the server at the other end of the URL. If something goes wrong, the string is nil and the NSError variable contains more details about the error.
-  NSString *resultString =
-      [NSString stringWithContentsOfURL:url
-                               encoding:NSUTF8StringEncoding
-                                  error:&error];
-  if (resultString == nil) {
-    NSLog(@"Download Error: %@", error);
-    return nil;
-  }
-  return resultString;
-}
-
-// This will convert a json string to a json object
-- (NSDictionary *)parseJSON:(NSString *)jsonString {
-  // Because the JSON data is actually in the form of a string, you have to put it into an NSData object first.
-  NSData *data = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-  NSError *error;
-  //  NSJSONSerialization class here to convert the JSON search results to an NSDictionary.
-  id resultObject = [NSJSONSerialization JSONObjectWithData:data
-                                                    options:kNilOptions
-                                                      error:&error];
-  if (resultObject == nil) {
-    NSLog(@"JSON Error: %@", error);
-    return nil;
-  }
-    
-// Just because NSJSONSerialization was able to turn the string into valid Objective-C objects, doesn’t mean that it returns an NSDictionary! It could have returned an NSArray or even an NSString or NSNumber... In the case of the iTunes store web service, the top-level object should be an NSDictionary, but you can’t control what happens on the server. If for some reason the server programmers decide to put [ ] brackets around the JSON data, then the top-level object will no longer be an NSDictionary but an NSArray.
-  if (![resultObject isKindOfClass:[NSDictionary class]]) {
-    NSLog(@"JSON Error: Expected dictionary");
-    return nil;
-  }
-    
-  return resultObject;
 }
 
 // Helper that creates and shows up alert
