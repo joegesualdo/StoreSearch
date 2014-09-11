@@ -98,7 +98,21 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     NSUInteger row = (NSUInteger) indexPath.row;
     SearchResult *searchResult = _searchResults[row];
     cell.nameLabel.text = searchResult.name;
-    cell.artistNameLabel.text = searchResult.artistName;
+      
+    NSString *artistName = searchResult.artistName;
+      
+    // check that the SearchResult’s artistName is not nil.
+    if (artistName == nil) {
+      // if it's nil, make the cell say “Unknown”
+      artistName = @"Unknown";
+    }
+      
+    // You also add the value of the kind property to the artist name label, which should tell the user what kind of product they’re looking at:
+    // We created the kindForDisplay below
+    NSString *kind = [self kindForDisplay:searchResult.kind];
+    cell.artistNameLabel.text = [NSString stringWithFormat:
+                               @"%@ (%@)", artistName, kind];
+      
     return cell;
   }
 }
@@ -150,6 +164,11 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
   }
     
   NSLog(@"Dictionary '%@'", dictionary);
+    
+  [self parseDictionary:dictionary];
+  
+  // sort the search results alphabetically. That’s quite easy, actually. NSMutableArray already has a method to sort itself. All you have to do is tell it what to sort on.
+  [_searchResults sortUsingSelector:@selector(compareName:)];
     
   [self.tableView reloadData];
 }
@@ -224,4 +243,119 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
   [alertView show];
 }
 
+// method goes through the top-level NSDictionary and looks at each search result in turn. If it’s a type of product the app supports, then it creates a SearchResult object for that product and adds it to the searchResults array.
+- (void)parseDictionary:(NSDictionary *)dictionary {
+  // makes sure the dictionary contains a key named results that contains an NSArray.
+  NSArray *array = dictionary[@"results"];
+  if (array == nil) {
+    NSLog(@"Expected 'results' array");
+    return;
+  }
+  // look at each of the array’s elements in turn. Remember that each of the elements from the array is another NSDictionary. For each of these dictionaries, you print out the value of its wrapperType and kind fields.
+  for (NSDictionary *resultDict in array) {
+    SearchResult *searchResult;
+    NSString *wrapperType = resultDict[@"wrapperType"];
+    NSString *kind = resultDict[@"kind"];
+    if ([wrapperType isEqualToString:@"track"]) {
+      // we created the parseTrack method below
+      searchResult = [self parseTrack:resultDict];
+    } else if ([wrapperType isEqualToString:@"audiobook"]) {
+      searchResult = [self parseAudioBook:resultDict];
+    } else if ([wrapperType isEqualToString:@"software"]) {
+      searchResult = [self parseSoftware:resultDict];
+    // For some reason, e-books do not have a wrapperType field, so in order to determine whether something is an e-book you have to look at the kind field instead.
+    } else if ([kind isEqualToString:@"ebook"]) {
+      searchResult = [self parseEBook:resultDict];
+    }
+    if (searchResult != nil) {
+      [_searchResults addObject:searchResult];
+    }
+  }
+}
+
+// You first allocate a new SearchResult object and then get the values out of the dictionary and put them in the SearchResult’s properties.
+- (SearchResult *)parseTrack:(NSDictionary *)dictionary {
+  SearchResult *searchResult = [[SearchResult alloc] init];
+  searchResult.name = dictionary[@"trackName"];
+  searchResult.artistName = dictionary[@"artistName"];
+  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
+  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
+  searchResult.storeURL = dictionary[@"trackViewUrl"];
+  searchResult.kind = dictionary[@"kind"];
+  searchResult.price = dictionary[@"trackPrice"];
+  searchResult.currency = dictionary[@"currency"];
+  searchResult.genre = dictionary[@"primaryGenreName"];
+  return searchResult;
+}
+
+- (SearchResult *)parseAudioBook:(NSDictionary *)dictionary {
+  SearchResult *searchResult = [[SearchResult alloc] init];
+  searchResult.name = dictionary[@"collectionName"];
+  searchResult.artistName = dictionary[@"artistName"];
+  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
+  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
+  searchResult.storeURL = dictionary[@"collectionViewUrl"];
+  // Audio books don’t have a “kind” field, so you have to set the kind property to @"audiobook" yourself.
+  searchResult.kind = @"audiobook";
+  searchResult.price = dictionary[@"collectionPrice"];
+  searchResult.currency = dictionary[@"currency"];
+  searchResult.genre = dictionary[@"primaryGenreName"];
+  return searchResult;
+}
+- (SearchResult *)parseSoftware:(NSDictionary *)dictionary {
+  SearchResult *searchResult = [[SearchResult alloc] init];
+  searchResult.name = dictionary[@"trackName"];
+  searchResult.artistName = dictionary[@"artistName"];
+  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
+  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
+  searchResult.storeURL = dictionary[@"trackViewUrl"];
+  searchResult.kind = dictionary[@"kind"];
+  searchResult.price = dictionary[@"price"];
+  searchResult.currency = dictionary[@"currency"];
+  searchResult.genre = dictionary[@"primaryGenreName"];
+  return searchResult;
+}
+- (SearchResult *)parseEBook:(NSDictionary *)dictionary {
+  SearchResult *searchResult = [[SearchResult alloc] init];
+  searchResult.name = dictionary[@"trackName"];
+  searchResult.artistName = dictionary[@"artistName"];
+  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
+  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
+  searchResult.storeURL = dictionary[@"trackViewUrl"];
+  searchResult.kind = dictionary[@"kind"];
+  searchResult.price = dictionary[@"price"];
+  searchResult.currency = dictionary[@"currency"];
+  // E-books don’t have a “primaryGenreName” field, but an array of genres. You use the componentsJoinedByString method from NSArray to glue these genre names into a single string, separated by commas.
+  searchResult.genre =
+      [(NSArray *)dictionary[@"genres"] componentsJoinedByString:@", "];
+  return searchResult;
+}
+
+//  The value of kind comes straight from the server and it is more of an internal name than something you’d want to show directly to the user.
+// This helper lets us change the name for kind
+- (NSString *)kindForDisplay:(NSString *)kind {
+  if ([kind isEqualToString:@"album"]) {
+    return @"Album";
+  } else if ([kind isEqualToString:@"audiobook"]) {
+    return @"Audio Book";
+  } else if ([kind isEqualToString:@"book"]) {
+    return @"Book";
+  } else if ([kind isEqualToString:@"ebook"]) {
+    return @"E-Book";
+  } else if ([kind isEqualToString:@"feature-movie"]) {
+    return @"Movie";
+  } else if ([kind isEqualToString:@"music-video"]) {
+    return @"Music Video";
+  } else if ([kind isEqualToString:@"podcast"]) {
+    return @"Podcast";
+  } else if ([kind isEqualToString:@"software"]) {
+    return @"App";
+  } else if ([kind isEqualToString:@"song"]) {
+    return @"Song";
+  } else if ([kind isEqualToString:@"tv-episode"]) {
+    return @"TV Episode";
+  } else {
+    return kind;
+  }
+}
 @end
