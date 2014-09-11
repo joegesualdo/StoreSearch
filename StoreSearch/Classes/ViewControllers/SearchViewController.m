@@ -59,6 +59,9 @@ static NSString * const NothingFoundCellIdentifier = @"NothingFoundCell";
     
     // adjust the row height
     self.tableView.rowHeight = 80;
+    
+    // This will make the keyboard popup with focus on the search bar when you enter the view
+    [self.searchBar becomeFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning
