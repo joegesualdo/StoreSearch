@@ -9,6 +9,9 @@
 #import "AppDelegate.h"
 #import "SearchViewController.h"
 
+// What is the appDelegate?
+// The poor AppDelegate is often abused. People give it too many responsibilities. Really, there isn’t that much for the app delegate to do. It gets a number of callbacks about the state of the app – whether the app is about to be closed, for example – and handling those events should be its primary responsibility. The app delegate also owns the main window and the top-level view controller. Other than that, it shouldn’t do much. Some developers use the app delegate as their data model. That is just bad design. You should really have a separate class for that (or several). Others make the app delegate work as their main control hub. Wrong again! Put that stuff in your top-level view controller.
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application
