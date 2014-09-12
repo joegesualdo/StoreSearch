@@ -19,6 +19,8 @@
 		E98963E519C2847100171675 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98963E319C2847100171675 /* DetailViewController.m */; };
 		E98963E619C2847100171675 /* DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E98963E419C2847100171675 /* DetailViewController.xib */; };
 		E98963EA19C3371000171675 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = E98963E919C3371000171675 /* GradientView.m */; };
+		E98963EF19C3486100171675 /* LandscapeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98963ED19C3486100171675 /* LandscapeViewController.m */; };
+		E98963F019C3486100171675 /* LandscapeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E98963EE19C3486100171675 /* LandscapeViewController.xib */; };
 		E9F5798E19C09C530026E51C /* SearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F5798D19C09C530026E51C /* SearchResult.m */; };
 		E9F5799219C0A54C0026E51C /* SearchResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9F5799119C0A54C0026E51C /* SearchResultCell.xib */; };
 		E9F5799619C0A84E0026E51C /* SearchResultCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F5799519C0A84E0026E51C /* SearchResultCell.m */; };
@@ -58,6 +60,9 @@
 		E98963E419C2847100171675 /* DetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = DetailViewController.xib; path = ../../Classes/ViewControllers/DetailViewController.xib; sourceTree = "<group>"; };
 		E98963E819C3371000171675 /* GradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientView.h; sourceTree = "<group>"; };
 		E98963E919C3371000171675 /* GradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientView.m; sourceTree = "<group>"; };
+		E98963EC19C3486100171675 /* LandscapeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LandscapeViewController.h; sourceTree = "<group>"; };
+		E98963ED19C3486100171675 /* LandscapeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LandscapeViewController.m; sourceTree = "<group>"; };
+		E98963EE19C3486100171675 /* LandscapeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LandscapeViewController.xib; path = ../../Classes/ViewControllers/LandscapeViewController.xib; sourceTree = "<group>"; };
 		E9F5798C19C09C530026E51C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		E9F5798D19C09C530026E51C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
 		E9F5799119C0A54C0026E51C /* SearchResultCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchResultCell.xib; sourceTree = "<group>"; };
@@ -169,6 +174,7 @@
 		634853336E8440B7B9BEEC6D /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				E98963EB19C3484100171675 /* Landscape */,
 				E98963E119C2844B00171675 /* DetailView */,
 				E911D18419C00500002EE72D /* Search */,
 			);
@@ -187,6 +193,7 @@
 		7A4026F23E9F4B5EB908460E /* Nibs */ = {
 			isa = PBXGroup;
 			children = (
+				E98963EE19C3486100171675 /* LandscapeViewController.xib */,
 				E98963E419C2847100171675 /* DetailViewController.xib */,
 				E911D18719C00529002EE72D /* SearchViewController.xib */,
 				E9F5799119C0A54C0026E51C /* SearchResultCell.xib */,
@@ -291,6 +298,15 @@
 				E98963E919C3371000171675 /* GradientView.m */,
 			);
 			name = Gradient;
+			sourceTree = "<group>";
+		};
+		E98963EB19C3484100171675 /* Landscape */ = {
+			isa = PBXGroup;
+			children = (
+				E98963EC19C3486100171675 /* LandscapeViewController.h */,
+				E98963ED19C3486100171675 /* LandscapeViewController.m */,
+			);
+			name = Landscape;
 			sourceTree = "<group>";
 		};
 		E9F5798B19C09C380026E51C /* SearchResult */ = {
@@ -417,6 +433,7 @@
 				E9F5799219C0A54C0026E51C /* SearchResultCell.xib in Resources */,
 				E9447D6E19C200C20091CE9E /* LoadingCell.xib in Resources */,
 				04A77FFEC7674C3B887BA236 /* Images.xcassets in Resources */,
+				E98963F019C3486100171675 /* LandscapeViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,6 +527,7 @@
 				E9F5798E19C09C530026E51C /* SearchResult.m in Sources */,
 				E6BC37C3FF21492BA5B04D97 /* main.m in Sources */,
 				E98963EA19C3371000171675 /* GradientView.m in Sources */,
+				E98963EF19C3486100171675 /* LandscapeViewController.m in Sources */,
 				E98963E519C2847100171675 /* DetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
