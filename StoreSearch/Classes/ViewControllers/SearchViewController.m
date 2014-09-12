@@ -137,6 +137,9 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // Removes the keyboard if it's on the screen
+    [self.searchBar resignFirstResponder];
+    
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     // Because this app uses nibs and not storyboards, you cannot make segues by drawing an array between two different view controllers. To show a new view controller you have to alloc and init it yourself and then present it. This is the equivalent of making a modal segue.
