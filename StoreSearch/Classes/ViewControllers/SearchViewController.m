@@ -142,6 +142,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     // Because this app uses nibs and not storyboards, you cannot make segues by drawing an array between two different view controllers. To show a new view controller you have to alloc and init it yourself and then present it. This is the equivalent of making a modal segue.
     DetailViewController *controller = [[DetailViewController alloc] initWithNibName: @"DetailViewController" bundle:nil];
     
+    controller.view.frame = self.view.frame;
+    
     // First, add the new view controller’s view as a subview. This places it on top of the table view, search bar and segmented control.
     [self.view addSubview:controller.view];
     // Then tell the SearchViewController that the DetailViewController is now managing that part of the screen, using addChildViewController:. If you forget this step then the new view controller may not always work correctly, as I shall demonstrate in a short while.
