@@ -10,6 +10,7 @@
 #import "SearchViewController.h"
 #import "SearchResult.h"
 #import "SearchResultCell.h"
+#import "DetailViewController.h"
 
 // This defines a symbolic name, SearchResultCellIdentifier, with the value @"SearchResultCell". Should you want to change this value, then you only have to do it here and any code that uses SearchResultCellIdentifier will be automatically updated.
 // There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
@@ -136,8 +137,18 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    //  simply deselect the row with an animation,
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    // Because this app uses nibs and not storyboards, you cannot make segues by drawing an array between two different view controllers. To show a new view controller you have to alloc and init it yourself and then present it. This is the equivalent of making a modal segue.
+    DetailViewController *controller = [[DetailViewController alloc] initWithNibName: @"DetailViewController" bundle:nil];
+    
+    // First, add the new view controller’s view as a subview. This places it on top of the table view, search bar and segmented control.
+    [self.view addSubview:controller.view];
+    // Then tell the SearchViewController that the DetailViewController is now managing that part of the screen, using addChildViewController:. If you forget this step then the new view controller may not always work correctly, as I shall demonstrate in a short while.
+    [self addChildViewController:controller];
+    // Tell the new view controller that it now has a parent view controller with didMoveToParentViewController:.
+    [controller didMoveToParentViewController:self];
+    
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView
