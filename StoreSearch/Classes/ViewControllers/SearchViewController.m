@@ -397,21 +397,38 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
                  bundle:nil];
     //  then you set the frame size of its view
     _landscapeViewController.view.frame = self.view.bounds;
+    // LandscapeViewController starts out completely see-through (alpha = 0.0)
+    _landscapeViewController.view.alpha = 0.0f;
     // Add it as a subview
     [self.view addSubview:_landscapeViewController.view];
     // embedding the view controller into the hierarchy so it will get all necessary callback events.
     [self addChildViewController:_landscapeViewController];
-    [_landscapeViewController didMoveToParentViewController:self];
+    
+    // slowly fades in lanscapeviewcontrollerwhile the rotation takes place until it’s completely visible (alpha = 1.0).
+      [UIView animateWithDuration:duration animations:^{
+          _landscapeViewController.view.alpha = 1.0f;
+      } completion:^(BOOL finished) {
+          // Notice that you delay the call to didMoveToParentViewController: until the animation is completed.
+          [_landscapeViewController didMoveToParentViewController:self];
+      }];
   }
 }
 
 - (void)hideLandscapeViewWithDuration:(NSTimeInterval)duration {
   if (_landscapeViewController != nil) {
     [_landscapeViewController willMoveToParentViewController:nil];
-    [_landscapeViewController.view removeFromSuperview];
-    [_landscapeViewController removeFromParentViewController];
-    // explicitly set the instance variable to nil in order to deallocate the LandscapeViewController object now that you’re done with it.
-    _landscapeViewController = nil;
+      
+      // This time you fade out the view (back to alpha = 0.0).
+      [UIView animateWithDuration:duration animations:^{
+          // This time you fade out the view (back to alpha = 0.0).
+          _landscapeViewController.view.alpha = 0.0f;
+      } completion:^(BOOL finished) {
+          // You don’t remove the view and the controller until the animation is completely done.
+          [_landscapeViewController.view removeFromSuperview];
+          [_landscapeViewController removeFromParentViewController];
+        // explicitly set the instance variable to nil in order to deallocate the LandscapeViewController object now that you’re done with it.
+          _landscapeViewController = nil;
+      }];
   }
 }
 @end
