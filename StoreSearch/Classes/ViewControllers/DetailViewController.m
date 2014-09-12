@@ -10,6 +10,15 @@
 
 @interface DetailViewController ()
 
+@property(nonatomic, weak) IBOutlet UIView *popupView;
+@property(nonatomic, weak) IBOutlet UIImageView *artworkImageView;
+
+@property(nonatomic, weak) IBOutlet UILabel *nameLabel;
+@property(nonatomic, weak) IBOutlet UILabel *artistNameLabel;
+@property(nonatomic, weak) IBOutlet UILabel *kindLabel;
+@property(nonatomic, weak) IBOutlet UILabel *genreLabel;
+@property(nonatomic, weak) IBOutlet UIButton *priceButton;
+
 @end
 
 @implementation DetailViewController
@@ -27,6 +36,11 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    
+    // We are setting the tranparency of the parent view through code because alpa was being passed to child views
+    [self.view setBackgroundColor:[[UIColor clearColor] colorWithAlphaComponent:0.5]];
+    
+
 }
 
 - (void)didReceiveMemoryWarning
