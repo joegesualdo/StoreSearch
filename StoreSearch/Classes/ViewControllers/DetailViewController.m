@@ -119,4 +119,11 @@
   [self.priceButton setTitle:priceText forState:UIControlStateNormal];
 }
 
+// The web service returned a URL to the product page. You simply tell the UIApplication object to open this URL. iOS will now figure out what sort of URL it is and launch the proper app – iTunes Store, App Store, Mobile Safari – in response.
+// If you run this on the Simulator, you’ll probably receive an error message that the URL could not be opened. Try it on your device instead.
+- (IBAction)openInStore:(id)sender {
+    [[UIApplication sharedApplication] openURL:
+     [NSURL URLWithString:self.searchResult.storeURL]];
+}
+
 @end
