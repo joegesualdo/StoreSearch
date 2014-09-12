@@ -407,6 +407,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     _landscapeViewController = [[LandscapeViewController alloc]
         initWithNibName:@"LandscapeViewController"
                  bundle:nil];
+    // pass the results to the landscape view
+    _landscapeViewController.searchResults = _searchResults;
     //  then you set the frame size of its view
     _landscapeViewController.view.frame = self.view.bounds;
     // LandscapeViewController starts out completely see-through (alpha = 0.0)

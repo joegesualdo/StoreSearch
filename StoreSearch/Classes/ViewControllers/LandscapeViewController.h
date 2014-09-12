@@ -10,4 +10,8 @@
 
 @interface LandscapeViewController : UIViewController
 
+// app needs to give the search results to LandscapeViewController so it can use them for its calculations.
+// set this property in SearchViewController upon rotation to landscape. 
+@property (nonatomic, strong) NSArray *searchResults;
+
 @end
