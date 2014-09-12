@@ -14,4 +14,7 @@
 // this property should be in the public header file because you need an other object to set it (namely the SearchViewController).
 @property (nonatomic, strong) SearchResult *searchResult;
 
+- (void)presentInParentViewController: (UIViewController *)parentViewController;
+- (void)dismissFromParentViewController;
+
 @end

@@ -71,6 +71,11 @@
 }
 
 - (IBAction)close:(id)sender {
+  [self dismissFromParentViewController];
+}
+
+- (void)dismissFromParentViewController
+{
   //Make sure the following 3 methods are called in order, or you will get a nasty crash
   // First you call willMoveToParentViewController: to tell the view controller that it is leaving the view controller hierarchy (it no longer has a parent)
   [self willMoveToParentViewController:nil];
@@ -78,6 +83,7 @@
   [self.view removeFromSuperview];
   // call removeFromParentViewController to truly dispose of the view controller.
   [self removeFromParentViewController];
+    
 }
 
 // Whenever I write a new view controller, I like to put an NSLog() in its dealloc method just to make sure the object is properly deallocated when the screen closes.
@@ -133,5 +139,15 @@
      [NSURL URLWithString:self.searchResult.storeURL]];
 }
 
+- (void)presentInParentViewController:(UIViewController *)parentViewController {
+  self.view.frame = parentViewController.view.bounds;
+  // First, add the new view controller’s view as a subview. This places it on top of the table view, search bar and segmented control.
+  [parentViewController.view addSubview:self.view];
+  // Then tell the SearchViewController that the DetailViewController is now managing that part of the screen, using addChildViewController:. If you forget this step then the new view controller may not always work correctly, as I shall demonstrate in a short while.
+  [parentViewController addChildViewController:self];
+  // Tell the new view controller that it now has a parent view controller with didMoveToParentViewController:.
+  [self didMoveToParentViewController:parentViewController];
+
+}
 
 @end

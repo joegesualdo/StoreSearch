@@ -149,14 +149,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     SearchResult *searchResult = _searchResults[indexPath.row];
     controller.searchResult = searchResult;
     
-    controller.view.frame = self.view.frame;
+    [controller presentInParentViewController:self];
     
-    // First, add the new view controller’s view as a subview. This places it on top of the table view, search bar and segmented control.
-    [self.view addSubview:controller.view];
-    // Then tell the SearchViewController that the DetailViewController is now managing that part of the screen, using addChildViewController:. If you forget this step then the new view controller may not always work correctly, as I shall demonstrate in a short while.
-    [self addChildViewController:controller];
-    // Tell the new view controller that it now has a parent view controller with didMoveToParentViewController:.
-    [controller didMoveToParentViewController:self];
     
 }
 
