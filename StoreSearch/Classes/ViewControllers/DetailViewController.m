@@ -80,14 +80,29 @@
   //Make sure the following 3 methods are called in order, or you will get a nasty crash
   // First you call willMoveToParentViewController: to tell the view controller that it is leaving the view controller hierarchy (it no longer has a parent)
   [self willMoveToParentViewController:nil];
-  // then you remove its view from the screen
-  [self.view removeFromSuperview];
-  // call removeFromParentViewController to truly dispose of the view controller.
-  [self removeFromParentViewController];
-    
-  // remove the gradient view when the pop-up gets dismissed.
-  [_gradientView removeFromSuperview];
-    
+
+  // Make a short animation before the view and the view controller truly get removed from the parent controller.
+  // WE want the popup to drop off the screen when we close it AND the gradient to fade out
+  [UIView animateWithDuration:0.3
+      animations:^{
+          // You also animate the gradient view by setting its alpha value to 0, which will fade it out. That’s essentially the reverse of what you did earlier except that the property is now called “alpha” instead of “opacity” (that’s one of the small differences between doing UIView-based animation and Core Animation; you gotta love it).
+          // First you get the view’s bounds, which describe a rectangle,
+          CGRect rect = self.view.bounds;
+          // then you change the Y coordinate of that rectangle
+          rect.origin.y += rect.size.height;
+          // finally you assign this new rectangle to the view’s frame.
+          self.view.frame = rect;
+          // You also animate the gradient view by setting its alpha value to 0, which will fade it out. That’s essentially the reverse of what you did earlier except that the property is now called “alpha” instead of “opacity” (that’s one of the small differences between doing UIView-based animation and Core Animation; you gotta love it).
+          _gradientView.alpha = 0.0f;
+      }
+      completion:^(BOOL finished) {
+          // then you remove its view from the screen
+          [self.view removeFromSuperview];
+          // call removeFromParentViewController to truly dispose of the view controller.
+          [self removeFromParentViewController];
+          // remove the gradient view when the pop-up gets dismissed.
+          [_gradientView removeFromSuperview];
+      }];
 }
 
 // Whenever I write a new view controller, I like to put an NSLog() in its dealloc method just to make sure the object is properly deallocated when the screen closes.
@@ -173,6 +188,14 @@
         functionWithName:kCAMediaTimingFunctionEaseInEaseOut],
     [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]
   ];
+    
+  // This is a simple CABasicAnimation that animates the _gradientView’s opacity value from 0.0 (fully see-through) to 1.0 (fully visible) in 0.2 seconds, resulting in a simple fade-in. That’s a bit more subtle than making the view appear so abruptly.
+  CABasicAnimation *fadeAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+  fadeAnimation.fromValue = @0.0f;
+  fadeAnimation.toValue = @1.0f;
+  fadeAnimation.duration = 0.2;
+  [_gradientView.layer addAnimation:fadeAnimation forKey:@"fadeAnimation"];
+
   // Finally, you add the animation to the view’s layer. Core Animation doesn’t work on the UIView objects themselves but on their CALayers.
   [self.view.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
 }
