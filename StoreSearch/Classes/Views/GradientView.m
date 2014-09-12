@@ -19,6 +19,9 @@
     if (self) {
       // set the background color to fully transparent.
       self.backgroundColor = [UIColor clearColor];
+      // This tells the view that it should change both its width and its height proportionally when the superview it belongs to changes its size (due to being rotated or otherwise). In practice this means the GradientView will always cover the same area that its superview covers and there should be no more gaps, even if the device gets rotated.
+      // since we created this view programatically, we couldn't use autolayout so autoresizingMask property you can tell a view what it should do when its superview changes in size. Autosizing is what iOS developers used before Auto Layout existed.
+      self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return self;
 }
