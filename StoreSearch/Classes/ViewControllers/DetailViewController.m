@@ -9,6 +9,7 @@
 #import "DetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import "SearchResult.h"
+#import <AFNetworking/UIImageView+AFNetworking.h>
 
 @interface DetailViewController () <UIGestureRecognizerDelegate>
 
@@ -80,7 +81,9 @@
 
 // Whenever I write a new view controller, I like to put an NSLog() in its dealloc method just to make sure the object is properly deallocated when the screen closes.
 - (void)dealloc {
+    // cancel the image download if the user closes the pop-up before the image has been downloaded completely.
     NSLog(@"dealloc %@", self);
+    [self.artworkImageView cancelImageRequestOperation];
 }
 
 #pragma mark - UIGesture delegates
@@ -104,6 +107,9 @@
   self.kindLabel.text = self.searchResult.kind;
   self.genreLabel.text = self.searchResult.genre;
     
+  [self.artworkImageView setImageWithURL:
+   [NSURL URLWithString:self.searchResult.artworkURL100]];
+    
   // You’ve used NSDateFormatter in previous tutorials to turn an NSDate object into human-readable text. Here you use NSNumberFormatter to do the same thing for numbers. It’s possible, of course, to turn a number into a string using stringWithFormat: and the right format specifier such as @"%f" or @"%d". However, in this case you’re not dealing with regular numbers but with money in a certain currency.
   NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
   // You simply tell the NSNumberFormatter that you want to display a currency value and what the currency code is. That currency code comes from the web service and is something like “USD” or “EUR”. The NSNumberFormatter will insert the proper symbol, such as $ or € or ¥, and formats the monetary amount according to the user’s regional settings.
@@ -125,5 +131,6 @@
     [[UIApplication sharedApplication] openURL:
      [NSURL URLWithString:self.searchResult.storeURL]];
 }
+
 
 @end
