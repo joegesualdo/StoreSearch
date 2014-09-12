@@ -7,7 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+@class SearchResult;
 
 @interface DetailViewController : UIViewController
+
+// this property should be in the public header file because you need an other object to set it (namely the SearchViewController).
+@property (nonatomic, strong) SearchResult *searchResult;
 
 @end

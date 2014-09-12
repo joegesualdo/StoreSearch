@@ -8,6 +8,7 @@
 
 #import "DetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import "SearchResult.h"
 
 @interface DetailViewController () <UIGestureRecognizerDelegate>
 
@@ -55,6 +56,9 @@
     
     [self.view addGestureRecognizer:gestureRecognizer];
     
+    if (self.searchResult != nil) {
+      [self updateUI];
+    }
 
 }
 
@@ -85,6 +89,34 @@
        shouldReceiveTouch:(UITouch *)touch
 {
   return (touch.view == self.view);
+}
+
+//logic for setting the text on the labels has its own method
+- (void)updateUI {
+    
+  self.kindLabel.text = [self.searchResult kindForDisplay];
+  self.nameLabel.text = self.searchResult.name;
+  NSString *artistName = self.searchResult.artistName;
+  if (artistName == nil) {
+    artistName = @"Unknown";
+  }
+  self.artistNameLabel.text = artistName;
+  self.kindLabel.text = self.searchResult.kind;
+  self.genreLabel.text = self.searchResult.genre;
+    
+  // You’ve used NSDateFormatter in previous tutorials to turn an NSDate object into human-readable text. Here you use NSNumberFormatter to do the same thing for numbers. It’s possible, of course, to turn a number into a string using stringWithFormat: and the right format specifier such as @"%f" or @"%d". However, in this case you’re not dealing with regular numbers but with money in a certain currency.
+  NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+  // You simply tell the NSNumberFormatter that you want to display a currency value and what the currency code is. That currency code comes from the web service and is something like “USD” or “EUR”. The NSNumberFormatter will insert the proper symbol, such as $ or € or ¥, and formats the monetary amount according to the user’s regional settings.
+  [formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+  [formatter setCurrencyCode:self.searchResult.currency];
+  NSString *priceText;
+  if ([self.searchResult.price floatValue] == 0.0f) {
+    priceText = @"Free";
+  } else {
+    priceText = [formatter stringFromNumber:self.searchResult.price];
+  }
+    
+  [self.priceButton setTitle:priceText forState:UIControlStateNormal];
 }
 
 @end

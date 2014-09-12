@@ -8,9 +8,10 @@
             <connections>
                 <outlet property="artistNameLabel" destination="o6C-No-gIs" id="LgK-H9-2Np"/>
                 <outlet property="artworkImageView" destination="YdP-yv-nbW" id="yjj-9b-obF"/>
-                <outlet property="genreLabel" destination="pR5-42-lJe" id="eC6-Po-fTZ"/>
-                <outlet property="kindLabel" destination="6oS-2G-q8a" id="Lyb-l5-ayf"/>
+                <outlet property="genreLabel" destination="VVE-XV-BPh" id="HIf-dq-4En"/>
+                <outlet property="kindLabel" destination="tD2-cB-bA8" id="TPC-v4-za5"/>
                 <outlet property="nameLabel" destination="Crf-hn-3yN" id="wFi-2F-m7f"/>
+                <outlet property="priceButton" destination="WVH-M4-GDG" id="VwF-1M-APG"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -72,13 +73,13 @@
                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="$9.99" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o6S-3e-iQc">
-                            <rect key="frame" x="169" y="229" width="62" height="21"/>
+                        <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WVH-M4-GDG">
+                            <rect key="frame" x="169" y="225" width="60" height="30"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
-                            <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                            <nil key="highlightedColor"/>
-                        </label>
+                            <state key="normal" title="$9.99">
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                        </button>
                     </subviews>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     <constraints>
