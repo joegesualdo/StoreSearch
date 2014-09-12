@@ -9,7 +9,8 @@
 #import "LandscapeViewController.h"
 #import "SearchResult.h"
 
-@interface LandscapeViewController ()
+// You’re going to make the view controller the delegate of the scroll view so it will be notified when the user is flicking through the pages.
+@interface LandscapeViewController () <UIScrollViewDelegate>
 
 @property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
 @property (nonatomic, weak) IBOutlet UIPageControl *pageControl;
@@ -39,6 +40,9 @@
     // An image? But you’re setting the backgroundColor property, which is a UIColor, not a UIImage?! Yup, that’s true, but UIColor has a cool trick that lets you use a tile- able image for a color. If you take a peek at the LandscapeBackground.png image in the asset catalog you’ll see that it is a small square. By setting this image as a pattern image on the background, you get a repeatable image that fills the whole screen. You can use tile-able images anywhere you can use a UIColor.
     
     self.scrollView.backgroundColor = [UIColor colorWithPatternImage: [UIImage imageNamed:@"LandscapeBackground"]];
+    
+  // This sets the number of dots that the page control displays to the number of pages that you calculated.
+    self.pageControl.numberOfPages = 0;
 }
 
 // The only safe place to perform calculations based on the final size of the view (i.e. any calculations that use the view’s frame or bounds) is in viewWillLayoutSubviews.
@@ -118,10 +122,32 @@
   }
   // you calculate the contentSize. We want the user to be able to “page” through these results, rather than simply scroll (a feature that you’ll enable shortly) so you should always make the content width a multiple of 480 or 568 points (the width of a single page). With a simple formula you can determine how many pages you need.
   int tilesPerPage = columnsPerPage * 3;
-  int numPages = ceilf([self.searchResults count] / (float)tilesPerPage);
+  int numPages = (int)ceilf([self.searchResults count] / (float)tilesPerPage);
   self.scrollView.contentSize = CGSizeMake(numPages *scrollViewWidth, self.scrollView.bounds.size.height);
 
   NSLog(@"Number of pages: %d", numPages);
+    
+  // This sets the number of dots that the page control displays to the number of pages that you calculated.
+  self.pageControl.numberOfPages = numPages;
+  self.pageControl.currentPage = 0;
 }
+
+// You also need to know when the user taps on the Page Control. There is no delegate for this but you can use a regular action method.
+// This works the other way around; when the user taps in the Page Control, its currentPage property gets updated and you use that to calculate a new contentOffset for the scroll view.
+- (IBAction)pageChanged:(UIPageControl *)sender {
+  self.scrollView.contentOffset =
+      CGPointMake(self.scrollView.bounds.size.width * sender.currentPage, 0);
+}
+
+#pragma mark - UIScrollViewDelegates
+
+// This is UIScrollViewDelegate methodk
+- (void)scrollViewDidScroll:(UIScrollView *)theScrollView {
+  // You figure out what the index of the current page is by looking at the contentOffset property of the scroll view. This property determines how far the scroll view has been scrolled and is updated while you’re dragging the scroll view. If the content offset gets beyond halfway on the page, the scroll view will flick to the next page. In that case, you update the pageControl’s active page number. Unfortunately, the scroll view doesn’t simply tell us, “The user has flipped to page X” so you have to calculate this yourself.
+  CGFloat width = self.scrollView.bounds.size.width;
+  int currentPage = (self.scrollView.contentOffset.x + width / 2.0f) / width;
+  self.pageControl.currentPage = currentPage;
+}
+
 
 @end
