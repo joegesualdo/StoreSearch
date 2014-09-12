@@ -9,7 +9,7 @@
 #import "DetailViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface DetailViewController ()
+@interface DetailViewController () <UIGestureRecognizerDelegate>
 
 @property(nonatomic, weak) IBOutlet UIView *popupView;
 @property(nonatomic, weak) IBOutlet UIImageView *artworkImageView;
@@ -46,6 +46,15 @@
     // set a border radius to the popview
     self.popupView.layer.cornerRadius = 10.0f;
     
+    // creates a new gesture recognizer that listens to taps anywhere in this view controller and calls the close: method in response.
+    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(close:)];
+    
+    // ??? what does this mean
+    gestureRecognizer.cancelsTouchesInView = NO;
+    gestureRecognizer.delegate = self;
+    
+    [self.view addGestureRecognizer:gestureRecognizer];
+    
 
 }
 
@@ -69,4 +78,13 @@
 - (void)dealloc {
     NSLog(@"dealloc %@", self);
 }
+
+#pragma mark - UIGesture delegates
+// This only returns YES when the touch was on the background view but NO if it was inside the Popup View.
+- (BOOL)gestureRecognizer: (UIGestureRecognizer *)gestureRecognizer
+       shouldReceiveTouch:(UITouch *)touch
+{
+  return (touch.view == self.view);
+}
+
 @end
