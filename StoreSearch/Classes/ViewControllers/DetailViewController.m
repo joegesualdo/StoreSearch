@@ -145,9 +145,34 @@
   [parentViewController.view addSubview:self.view];
   // Then tell the SearchViewController that the DetailViewController is now managing that part of the screen, using addChildViewController:. If you forget this step then the new view controller may not always work correctly, as I shall demonstrate in a short while.
   [parentViewController addChildViewController:self];
-  // Tell the new view controller that it now has a parent view controller with didMoveToParentViewController:.
-  [self didMoveToParentViewController:parentViewController];
+  // create a CAKeyframeAnimation object that works on the view’s transform.scale attributes. That means you’ll be animating the size of the view.
+  CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+  // The animation consists of several keyframes. It will smoothly proceed from one keyframe to the other over a certain amount of time. The values for the keyframes are added to the animation’s values property. Because you’re animating the view’s scale, these particular values represent how much bigger or smaller the view will be over time.
+  bounceAnimation.duration = 0.4;
+  bounceAnimation.delegate = self;
+  // By quickly changing the view size from small to big to small to normal, you create a bounce effect.
+  // The animation starts with the view scaled down to 70% (scale 0.7). The next keyframe inflates it to 120% its normal size. After that, it will scale the view down a bit again but not as much as before (only 90% of its original size), and the last keyframe ends up with a scale of 1.0, which restores the view to an undistorted shape.
+  bounceAnimation.values = @[ @0.7, @1.2, @0.9, @1.0 ];
+  // For each keyframe you can also specify a time. You can see this as the duration between two successive keyframes. In this case, each transition from one keyframe to the next takes 1/3rd of the total animation time. Note that these times are not in seconds but in fractions of the animation’s duration. The total duration is 0.4 seconds.
+  bounceAnimation.keyTimes = @[ @0.0, @0.334, @0.666, @1.0 ];
+    // ou can also specify a timing function that is used to go from one keyframe to the next. I chose to use the “Ease In, Ease Out” function, which starts slowly, then ramps up to full speed, and then slows down again. You can also choose just “Ease In” (think accelerating) or “Ease Out” (think decelerating) or a linear interpolation, but the latter doesn’t tend to look very realistic. Moving objects in real-life always need some time to get started or slow down and that is what the timing function does.
+  bounceAnimation.timingFunctions = @[
+    [CAMediaTimingFunction
+        functionWithName:kCAMediaTimingFunctionEaseInEaseOut],
+    [CAMediaTimingFunction
+        functionWithName:kCAMediaTimingFunctionEaseInEaseOut],
+    [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]
+  ];
+  // Finally, you add the animation to the view’s layer. Core Animation doesn’t work on the UIView objects themselves but on their CALayers.
+  [self.view.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
+}
 
+// You also set the animation’s delegate. You need to know when the animation stops because at that point you must call the didMoveToParentViewController: method. That’s part of the three steps of embedding one view controller into another, remember? By making DetailViewController the delegate of the CAKeyframeAnimation, you will be told when the animation stopped.
+// Note that for this Core Animation delegate there is no need to put a protocol declaration into the @interface line. CAKeyframeAnimation doesn’t use a formal protocol for its delegate. All you need to do is implement the animationDidStop:finished: method and you’re done.
+- (void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag {
+  // Tell the new view controller that it now has a parent view controller with didMoveToParentViewController:.
+  // So you’re always responsible for calling this method on the child view controller once the animation completes. Don’t forget this; it’s part of the rules for embedding view controllers.
+  [self didMoveToParentViewController: self.parentViewController];
 }
 
 @end
