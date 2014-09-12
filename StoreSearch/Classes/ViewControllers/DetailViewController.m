@@ -43,6 +43,7 @@
     // We are setting the tranparency of the parent view through code because alpa was being passed to child views
     [self.view setBackgroundColor:[[UIColor clearColor] colorWithAlphaComponent:0.5]];
     
+    
     // each view has one, and that layers have some handy properties (like cornerRadius)
     // To use these properties must import <QuartzCore/QuartzCore.h>
     // set a border radius to the popview

@@ -18,6 +18,7 @@
 		E9447D6E19C200C20091CE9E /* LoadingCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9447D6D19C200C20091CE9E /* LoadingCell.xib */; };
 		E98963E519C2847100171675 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98963E319C2847100171675 /* DetailViewController.m */; };
 		E98963E619C2847100171675 /* DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E98963E419C2847100171675 /* DetailViewController.xib */; };
+		E98963EA19C3371000171675 /* GradientView.m in Sources */ = {isa = PBXBuildFile; fileRef = E98963E919C3371000171675 /* GradientView.m */; };
 		E9F5798E19C09C530026E51C /* SearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F5798D19C09C530026E51C /* SearchResult.m */; };
 		E9F5799219C0A54C0026E51C /* SearchResultCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E9F5799119C0A54C0026E51C /* SearchResultCell.xib */; };
 		E9F5799619C0A84E0026E51C /* SearchResultCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E9F5799519C0A84E0026E51C /* SearchResultCell.m */; };
@@ -55,6 +56,8 @@
 		E98963E219C2847100171675 /* DetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
 		E98963E319C2847100171675 /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
 		E98963E419C2847100171675 /* DetailViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = DetailViewController.xib; path = ../../Classes/ViewControllers/DetailViewController.xib; sourceTree = "<group>"; };
+		E98963E819C3371000171675 /* GradientView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GradientView.h; sourceTree = "<group>"; };
+		E98963E919C3371000171675 /* GradientView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GradientView.m; sourceTree = "<group>"; };
 		E9F5798C19C09C530026E51C /* SearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchResult.h; sourceTree = "<group>"; };
 		E9F5798D19C09C530026E51C /* SearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchResult.m; sourceTree = "<group>"; };
 		E9F5799119C0A54C0026E51C /* SearchResultCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SearchResultCell.xib; sourceTree = "<group>"; };
@@ -281,6 +284,15 @@
 			name = DetailView;
 			sourceTree = "<group>";
 		};
+		E98963E719C336F700171675 /* Gradient */ = {
+			isa = PBXGroup;
+			children = (
+				E98963E819C3371000171675 /* GradientView.h */,
+				E98963E919C3371000171675 /* GradientView.m */,
+			);
+			name = Gradient;
+			sourceTree = "<group>";
+		};
 		E9F5798B19C09C380026E51C /* SearchResult */ = {
 			isa = PBXGroup;
 			children = (
@@ -310,6 +322,7 @@
 		FDCCFE913DC14DFEAC8D05F0 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E98963E719C336F700171675 /* Gradient */,
 				E9F5799319C0A8260026E51C /* SearchResultCell */,
 			);
 			path = Views;
@@ -496,6 +509,7 @@
 				E9F5799619C0A84E0026E51C /* SearchResultCell.m in Sources */,
 				E9F5798E19C09C530026E51C /* SearchResult.m in Sources */,
 				E6BC37C3FF21492BA5B04D97 /* main.m in Sources */,
+				E98963EA19C3371000171675 /* GradientView.m in Sources */,
 				E98963E519C2847100171675 /* DetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
