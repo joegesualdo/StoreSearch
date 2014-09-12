@@ -35,4 +35,9 @@
     // Dispose of any resources that can be recreated.
 }
 
+// add a dealloc method, just so you can see that the view controller truly gets deallocated
+- (void)dealloc {
+    NSLog(@"dealloc %@", self);
+}
+
 @end

@@ -11,6 +11,7 @@
 #import "SearchResult.h"
 #import "SearchResultCell.h"
 #import "DetailViewController.h"
+#import "LandscapeViewController.h"
 
 // This defines a symbolic name, SearchResultCellIdentifier, with the value @"SearchResultCell". Should you want to change this value, then you only have to do it here and any code that uses SearchResultCellIdentifier will be automatically updated.
 // There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
@@ -38,6 +39,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     // tells if the search is loading
     BOOL _isLoading;
     NSOperationQueue *_queue;
+    LandscapeViewController *_landscapeViewController;
 }
 
 // In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
@@ -374,4 +376,42 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     NSLog(@"Woooo");
 }
 
+// This is a delegate method that is called when the phone is about to rotate
+//  When a view controller is about to be flipped over, it will let you know with this method. You can override it to show (and hide) the new LandscapeViewController.
+-(void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+{
+  [super willRotateToInterfaceOrientation:toInterfaceOrientation duration:duration];
+    NSLog(@"Did Rotate");
+  if (UIInterfaceOrientationIsPortrait(toInterfaceOrientation)) {
+      [self hideLandscapeViewWithDuration:duration];
+  } else {
+    [self showLandscapeViewWithDuration:duration];
+  }
+}
+
+- (void)showLandscapeViewWithDuration:(NSTimeInterval)duration {
+  if (_landscapeViewController == nil) {
+    //  First you create the new view controller object,
+    _landscapeViewController = [[LandscapeViewController alloc]
+        initWithNibName:@"LandscapeViewController"
+                 bundle:nil];
+    //  then you set the frame size of its view
+    _landscapeViewController.view.frame = self.view.bounds;
+    // Add it as a subview
+    [self.view addSubview:_landscapeViewController.view];
+    // embedding the view controller into the hierarchy so it will get all necessary callback events.
+    [self addChildViewController:_landscapeViewController];
+    [_landscapeViewController didMoveToParentViewController:self];
+  }
+}
+
+- (void)hideLandscapeViewWithDuration:(NSTimeInterval)duration {
+  if (_landscapeViewController != nil) {
+    [_landscapeViewController willMoveToParentViewController:nil];
+    [_landscapeViewController.view removeFromSuperview];
+    [_landscapeViewController removeFromParentViewController];
+    // explicitly set the instance variable to nil in order to deallocate the LandscapeViewController object now that you’re done with it.
+    _landscapeViewController = nil;
+  }
+}
 @end
