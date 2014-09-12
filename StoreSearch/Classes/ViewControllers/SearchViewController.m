@@ -40,6 +40,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     BOOL _isLoading;
     NSOperationQueue *_queue;
     LandscapeViewController *_landscapeViewController;
+    // This variable keeps track of whether the status bar should be black (“default”) or white (“light content”).
+    UIStatusBarStyle _statusBarStyle;
 }
 
 // In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
@@ -77,6 +79,9 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     
     // This will make the keyboard popup with focus on the search bar when you enter the view
     [self.searchBar becomeFirstResponder];
+    
+    // give this variable an initial value
+    _statusBarStyle = UIStatusBarStyleDefault;
 }
 
 - (void)didReceiveMemoryWarning
@@ -407,6 +412,11 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     // slowly fades in lanscapeviewcontrollerwhile the rotation takes place until it’s completely visible (alpha = 1.0).
       [UIView animateWithDuration:duration animations:^{
           _landscapeViewController.view.alpha = 1.0f;
+          
+          // this changes the value of _statusBarStyle and then tells the view controller to update the appearance of the status bar. This causes the preferredStatusBarStyle method to be re-evaluated and the status bar will redraw itself in the new color.
+          _statusBarStyle = UIStatusBarStyleLightContent;
+          [self setNeedsStatusBarAppearanceUpdate];
+          
       } completion:^(BOOL finished) {
           // Notice that you delay the call to didMoveToParentViewController: until the animation is completed.
           [_landscapeViewController didMoveToParentViewController:self];
@@ -422,6 +432,11 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
       [UIView animateWithDuration:duration animations:^{
           // This time you fade out the view (back to alpha = 0.0).
           _landscapeViewController.view.alpha = 0.0f;
+          
+          // this changes the value of _statusBarStyle and then tells the view controller to update the appearance of the status bar. This causes the preferredStatusBarStyle method to be re-evaluated and the status bar will redraw itself in the new color.
+          _statusBarStyle = UIStatusBarStyleDefault;
+          [self setNeedsStatusBarAppearanceUpdate];
+          
       } completion:^(BOOL finished) {
           // You don’t remove the view and the controller until the animation is completely done.
           [_landscapeViewController.view removeFromSuperview];
@@ -430,5 +445,12 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
           _landscapeViewController = nil;
       }];
   }
+}
+
+// This method is called by UIKit to determine what color to make the status bar.
+// can trigger this method with setNeedsStatusBarAppearanceUpdate:
+// [self setNeedsStatusBarAppearanceUpdate];
+- (UIStatusBarStyle)preferredStatusBarStyle {
+    return _statusBarStyle;
 }
 @end
