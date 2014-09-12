@@ -63,4 +63,9 @@
   CGGradientRelease(gradient);
 }
 
+//  verify that the gradient view is properly deallocated:
+- (void)dealloc {
+    NSLog(@"dealloc %@", self);
+}
+
 @end

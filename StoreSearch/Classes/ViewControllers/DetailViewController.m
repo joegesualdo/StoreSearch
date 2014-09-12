@@ -10,6 +10,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "SearchResult.h"
 #import <AFNetworking/UIImageView+AFNetworking.h>
+#import "GradientView.h"
 
 @interface DetailViewController () <UIGestureRecognizerDelegate>
 
@@ -25,6 +26,9 @@
 @end
 
 @implementation DetailViewController
+{
+    GradientView *_gradientView;
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -39,9 +43,6 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    
-    // We are setting the tranparency of the parent view through code because alpa was being passed to child views
-    [self.view setBackgroundColor:[[UIColor clearColor] colorWithAlphaComponent:0.5]];
     
     
     // each view has one, and that layers have some handy properties (like cornerRadius)
@@ -83,6 +84,9 @@
   [self.view removeFromSuperview];
   // call removeFromParentViewController to truly dispose of the view controller.
   [self removeFromParentViewController];
+    
+  // remove the gradient view when the pop-up gets dismissed.
+  [_gradientView removeFromSuperview];
     
 }
 
@@ -140,6 +144,12 @@
 }
 
 - (void)presentInParentViewController:(UIViewController *)parentViewController {
+  // You create a new GradientView object by hand that is just as big as the view from the parent view controller.
+  _gradientView = [[GradientView alloc] initWithFrame:parentViewController.view.bounds];
+  //add the _gradientView it as a subview to that parent view controller.
+  // doing this before you add DetailViewController’s view to the parent view controller, which causes the GradientView to sit below the pop- up, which is exactly where you want it.
+  [parentViewController.view addSubview:_gradientView];
+    
   self.view.frame = parentViewController.view.bounds;
   // First, add the new view controller’s view as a subview. This places it on top of the table view, search bar and segmented control.
   [parentViewController.view addSubview:self.view];
