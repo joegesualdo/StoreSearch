@@ -42,6 +42,9 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     LandscapeViewController *_landscapeViewController;
     // This variable keeps track of whether the status bar should be black (“default”) or white (“light content”).
     UIStatusBarStyle _statusBarStyle;
+    // this pointer is no longer keeping the object alive and as soon as the object is deallocated, _detailViewController automatically becomes nil.
+    // if we didn't put this, then the detailViewcontroller would stay alive since this instnance varaible was strongly pointing to it
+    __weak DetailViewController *_detailViewController;
 }
 
 // In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
@@ -158,7 +161,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     
     [controller presentInParentViewController:self];
     
-    
+    _detailViewController = controller;
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView
@@ -396,6 +399,10 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 - (void)showLandscapeViewWithDuration:(NSTimeInterval)duration {
   if (_landscapeViewController == nil) {
+    //Hide keyboard when entering landscape mode
+    [self.searchBar resignFirstResponder];
+    // dismiss the detail view if you swith to landscape mode
+    [_detailViewController dismissFromParentViewController];
     //  First you create the new view controller object,
     _landscapeViewController = [[LandscapeViewController alloc]
         initWithNibName:@"LandscapeViewController"
