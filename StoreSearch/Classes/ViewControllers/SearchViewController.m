@@ -12,6 +12,7 @@
 #import "SearchResultCell.h"
 #import "DetailViewController.h"
 #import "LandscapeViewController.h"
+#import "Search.h"
 
 // This defines a symbolic name, SearchResultCellIdentifier, with the value @"SearchResultCell". Should you want to change this value, then you only have to do it here and any code that uses SearchResultCellIdentifier will be automatically updated.
 // There is another reason for using a symbolic name rather than the actual value: it gives extra meaning. Just seeing the text @"SearchResultCell" says less about its intended purpose than the word SearchResultCellIdentifier.
@@ -35,10 +36,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 @implementation SearchViewController
 {
     // instance variables
-    NSMutableArray *_searchResults;
-    // tells if the search is loading
-    BOOL _isLoading;
-    NSOperationQueue *_queue;
+    Search *_search;
+    
     LandscapeViewController *_landscapeViewController;
     // This variable keeps track of whether the status bar should be black (“default”) or white (“light content”).
     UIStatusBarStyle _statusBarStyle;
@@ -47,16 +46,17 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     __weak DetailViewController *_detailViewController;
 }
 
-// In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-      // You will create this _queue object when the view controller gets instantiated, in other words in its init method.
-      _queue = [[NSOperationQueue alloc] init];
-    }
-    return self;
-}
+// DONT NEED ANYMORE
+//// In previous tutorials you used initWithCoder: but here the view controller is not loaded from a storyboard or nib (only its view is). Look inside AppDelegate.m if you don’t believe me. There you’ll see the line that calls initWithNibName:bundle: to create and initialize the SearchViewController object. So that is the proper init method to add this code to.
+//- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+//{
+//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+//    if (self) {
+//      // You will create this _queue object when the view controller gets instantiated, in other words in its init method.
+//      _queue = [[NSOperationQueue alloc] init];
+//    }
+//    return self;
+//}
 
 - (void)viewDidLoad
 {
@@ -97,18 +97,15 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 
 - (NSInteger)tableView:(UITableView *)tableView
     numberOfRowsInSection:(NSInteger)section {
-    
-    // If results are loading, return once cell, because that cell wll have the "Loading" symbl
-    if (_isLoading) {
-        return 1;
-    }else if (_searchResults == nil) {
-        return 0;
-    // If there are no results this now returns 1, for the row with the text “(Nothing Found)”.
-    } else if ([_searchResults count] == 0) {
-        return 1;
-    } else {
-        return (int)[_searchResults count];
-    }
+  if (_search == nil) {
+    return 0; // Not searched yet
+  } else if (_search.isLoading) {
+    return 1; // Loading...
+  } else if ([_search.searchResults count] == 0) {
+    return 1; // Nothing Found }
+  } else {
+    return [_search.searchResults count];
+  }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
@@ -116,8 +113,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
   // only make a SearchResultCell if there are actually any results. If the array is empty, you’ll simply dequeue the cell for the NothingFoundCellIdentifier and return it
     
   // search results are loading, we will show the Loading cell
-    NSLog(@"_isLoading -- %hhd", _isLoading);
-  if (_isLoading) {
+    NSLog(@"_isLoading -- %hhd", _search.isLoading);
+  if (_search.isLoading) {
       UITableViewCell *cell = [tableView
                                dequeueReusableCellWithIdentifier:LoadingCellIdentifier
                                forIndexPath:indexPath];
@@ -127,7 +124,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
       // tells the spinner to start animating.
       [spinner startAnimating];
       return cell;
-  }else if ([_searchResults count] == 0) {
+  }else if ([_search.searchResults count] == 0) {
     return [tableView dequeueReusableCellWithIdentifier:NothingFoundCellIdentifier
                                         forIndexPath:indexPath];
   } else {
@@ -135,7 +132,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
         [tableView dequeueReusableCellWithIdentifier:SearchResultCellIdentifier
                                         forIndexPath:indexPath];
     NSUInteger row = (NSUInteger) indexPath.row;
-    SearchResult *searchResult = _searchResults[row];
+    SearchResult *searchResult = _search.searchResults[row];
       
     // we now configure the cell with the method we created in SearchREsultCell
     [cell configureForSearchResult:searchResult];
@@ -156,7 +153,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     DetailViewController *controller = [[DetailViewController alloc] initWithNibName: @"DetailViewController" bundle:nil];
     
     // look up the SearchResult object and put it in DetailViewController’s property.￼
-    SearchResult *searchResult = _searchResults[indexPath.row];
+    SearchResult *searchResult = _search.searchResults[indexPath.row];
     controller.searchResult = searchResult;
     
     [controller presentInParentViewController:self];
@@ -167,7 +164,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
 - (NSIndexPath *)tableView:(UITableView *)tableView
     willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
   // makes sure that you can only select rows with actual search results, not the loading cell or nothing found cell
-  if ([_searchResults count] == 0 || _isLoading) {
+  if ([_search.searchResults count] == 0 || _search.isLoading) {
     return nil;
   } else {
     return indexPath;
@@ -184,89 +181,70 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
     [self performSearch];
 }
 
--(void)performSearch
-{
-  if ([self.searchBar.text length] > 0) {
-    [self.searchBar resignFirstResponder];
-      
-    // Every time the user performs a new search you cancel the previous request
-    // cancel everything that is in a que
-    [_queue cancelAllOperations];
-    _isLoading = YES;
-    [self.tableView reloadData];
-    _searchResults = [NSMutableArray arrayWithCapacity:10];
-    NSURL *url = [self urlWithSearchText:self.searchBar.text category:self.segmentedControl.selectedSegmentIndex];
-    // After you’ve created the NSURL object like before, you now put it into an NSURLRequest object.
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    //  You use that request object to create a new AFHTTPRequestOperation object.
-    AFHTTPRequestOperation *operation =
-        [[AFHTTPRequestOperation alloc] initWithRequest:request];
-    operation.responseSerializer = [AFJSONResponseSerializer serializer];
-    // As you can see, AFHTTPRequestOperation takes two blocks, one for success and one for failure.
-    // The code in the success block is executed when everything goes right, while the code from the failure block gets executed if there is some problem making the request or when the response isn’t valid JSON.
-    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation * operation,
-                                               id responseObject) {
-        // This takes the object from the responseObject parameter, which is actually an NSDictionary, and calls parseDictionary: to turn its contents into SearchResult objects, just like you did before.
-        [self parseDictionary:responseObject];
-        // sort the results and put everything into the table.
-        [_searchResults sortUsingSelector:@selector(compareName:)];
-        //hide the loading cell
-        _isLoading = NO;
-        // reload table
-        [self.tableView reloadData];
-    } failure:^(AFHTTPRequestOperation *operation,
-                NSError *error) {
-        
-        // Canceling an AFHTTPRequestOperation invokes its failure block, so add these lines to the failure block to prevent the app from showing an error message. Becuase above, if you user searched for something else before the results are returned, the operation is cancelled
-        if (operation.isCancelled) {
-          return;
-        }
-        // howNetworkError message to tell the user that something went wrong.
-        [self showNetworkError];
-        //hide the loading cell
-        _isLoading = NO;
-        // reload table
-        [self.tableView reloadData];
-    }];
-    [_queue addOperation:operation];
-  }
+- (void)performSearch {
+  _search = [[Search alloc] init];
+  NSLog(@"allocated %@", _search);
+  //  pass a completion block to the performSearchForText method. The code in this block gets called after the search completes, with the success parameter being either YES or NO. A lot simpler than making a delegate, no? This block is always called on the main thread, so it’s safe to can use UI code here.
+  [_search performSearchForText:self.searchBar.text category:self.segmentedControl.selectedSegmentIndex completion:^(BOOL success) {
+      if (!success) {
+          [self showNetworkError];
+      }
+      [self.tableView reloadData];
+  }];
+  [self.tableView reloadData];
+  [self.searchBar resignFirstResponder];
 }
 
+// DO NOT NEED ANY MORE
+//-(void)performSearch
+//{
+//  if ([self.searchBar.text length] > 0) {
+//    [self.searchBar resignFirstResponder];
+//      
+//    // Every time the user performs a new search you cancel the previous request
+//    // cancel everything that is in a que
+//    [_queue cancelAllOperations];
+//    _isLoading = YES;
+//    [self.tableView reloadData];
+//    _searchResults = [NSMutableArray arrayWithCapacity:10];
+//    NSURL *url = [self urlWithSearchText:self.searchBar.text category:self.segmentedControl.selectedSegmentIndex];
+//    // After you’ve created the NSURL object like before, you now put it into an NSURLRequest object.
+//    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+//    //  You use that request object to create a new AFHTTPRequestOperation object.
+//    AFHTTPRequestOperation *operation =
+//        [[AFHTTPRequestOperation alloc] initWithRequest:request];
+//    operation.responseSerializer = [AFJSONResponseSerializer serializer];
+//    // As you can see, AFHTTPRequestOperation takes two blocks, one for success and one for failure.
+//    // The code in the success block is executed when everything goes right, while the code from the failure block gets executed if there is some problem making the request or when the response isn’t valid JSON.
+//    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation * operation,
+//                                               id responseObject) {
+//        // This takes the object from the responseObject parameter, which is actually an NSDictionary, and calls parseDictionary: to turn its contents into SearchResult objects, just like you did before.
+//        [self parseDictionary:responseObject];
+//        // sort the results and put everything into the table.
+//        [_searchResults sortUsingSelector:@selector(compareName:)];
+//        //hide the loading cell
+//        _isLoading = NO;
+//        // reload table
+//        [self.tableView reloadData];
+//    } failure:^(AFHTTPRequestOperation *operation,
+//                NSError *error) {
+//        
+//        // Canceling an AFHTTPRequestOperation invokes its failure block, so add these lines to the failure block to prevent the app from showing an error message. Becuase above, if you user searched for something else before the results are returned, the operation is cancelled
+//        if (operation.isCancelled) {
+//          return;
+//        }
+//        // howNetworkError message to tell the user that something went wrong.
+//        [self showNetworkError];
+//        //hide the loading cell
+//        _isLoading = NO;
+//        // reload table
+//        [self.tableView reloadData];
+//    }];
+//    [_queue addOperation:operation];
+//  }
+//}
 
-- (NSURL *)urlWithSearchText:(NSString *)searchText category:(NSInteger)category
-{
-  NSString *categoryName;
-    
-  // This first turns the category index from a number into a string. (Note that the category index is passed to the method as a new parameter.)
-  switch (category) {
-    // For the first tab  of the segmented control -- "ALL"
-    case 0:
-      categoryName = @"";
-      break;
-    // For the second tab  of the segmented control -- "Music"
-    case 1:
-      categoryName = @"musicTrack";
-      break;
-    // For the third tab  of the segmented control -- "Software"
-    case 2:
-      categoryName = @"software";
-      break;
-    // For the fourth tab  of the segmented control -- "E-books"
-    case 3:
-      categoryName = @"ebook";
-      break;
-  }
-  //  A space is not a valid character in a URL. Many other characters aren’t valid either (such as the < or > signs) and therefore must be escaped. Another term for this is URL encoding. A space, for example, can be encoded as the + sign (you did that earlier when you typed the URL into the web browser) or as the character sequence %20.
-  // Fortunately, NSString can do this encoding already,
-    // stringbyAddingPercentEscapesUsingEcoding method escaped all the spaces by putting %20
-  NSString *escapedSearchText = [searchText stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-  NSString *urlString = [NSString
-      stringWithFormat:@"http://itunes.apple.com/search?term=%@&limit=200&entity=%@", escapedSearchText, categoryName];
-  // This creates a url object by passing it the url string
-  NSURL *url = [NSURL URLWithString:urlString];
-  // retuns the url obect
-  return url;
-}
+
 
 // The search bar has an ugly white gap above it. This removes it
 // This is part of the SearchBarDelegate protocol.
@@ -287,98 +265,10 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
   [alertView show];
 }
 
-// method goes through the top-level NSDictionary and looks at each search result in turn. If it’s a type of product the app supports, then it creates a SearchResult object for that product and adds it to the searchResults array.
-- (void)parseDictionary:(NSDictionary *)dictionary {
-  // makes sure the dictionary contains a key named results that contains an NSArray.
-  NSArray *array = dictionary[@"results"];
-  if (array == nil) {
-    NSLog(@"Expected 'results' array");
-    return;
-  }
-  // look at each of the array’s elements in turn. Remember that each of the elements from the array is another NSDictionary. For each of these dictionaries, you print out the value of its wrapperType and kind fields.
-  for (NSDictionary *resultDict in array) {
-    SearchResult *searchResult;
-    NSString *wrapperType = resultDict[@"wrapperType"];
-    NSString *kind = resultDict[@"kind"];
-    if ([wrapperType isEqualToString:@"track"]) {
-      // we created the parseTrack method below
-      searchResult = [self parseTrack:resultDict];
-    } else if ([wrapperType isEqualToString:@"audiobook"]) {
-      searchResult = [self parseAudioBook:resultDict];
-    } else if ([wrapperType isEqualToString:@"software"]) {
-      searchResult = [self parseSoftware:resultDict];
-    // For some reason, e-books do not have a wrapperType field, so in order to determine whether something is an e-book you have to look at the kind field instead.
-    } else if ([kind isEqualToString:@"ebook"]) {
-      searchResult = [self parseEBook:resultDict];
-    }
-    if (searchResult != nil) {
-      [_searchResults addObject:searchResult];
-    }
-  }
-}
-
-// You first allocate a new SearchResult object and then get the values out of the dictionary and put them in the SearchResult’s properties.
-- (SearchResult *)parseTrack:(NSDictionary *)dictionary {
-  SearchResult *searchResult = [[SearchResult alloc] init];
-  searchResult.name = dictionary[@"trackName"];
-  searchResult.artistName = dictionary[@"artistName"];
-  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
-  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
-  searchResult.storeURL = dictionary[@"trackViewUrl"];
-  searchResult.kind = dictionary[@"kind"];
-  searchResult.price = dictionary[@"trackPrice"];
-  searchResult.currency = dictionary[@"currency"];
-  searchResult.genre = dictionary[@"primaryGenreName"];
-  return searchResult;
-}
-
-- (SearchResult *)parseAudioBook:(NSDictionary *)dictionary {
-  SearchResult *searchResult = [[SearchResult alloc] init];
-  searchResult.name = dictionary[@"collectionName"];
-  searchResult.artistName = dictionary[@"artistName"];
-  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
-  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
-  searchResult.storeURL = dictionary[@"collectionViewUrl"];
-  // Audio books don’t have a “kind” field, so you have to set the kind property to @"audiobook" yourself.
-  searchResult.kind = @"audiobook";
-  searchResult.price = dictionary[@"collectionPrice"];
-  searchResult.currency = dictionary[@"currency"];
-  searchResult.genre = dictionary[@"primaryGenreName"];
-  return searchResult;
-}
-- (SearchResult *)parseSoftware:(NSDictionary *)dictionary {
-  SearchResult *searchResult = [[SearchResult alloc] init];
-  searchResult.name = dictionary[@"trackName"];
-  searchResult.artistName = dictionary[@"artistName"];
-  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
-  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
-  searchResult.storeURL = dictionary[@"trackViewUrl"];
-  searchResult.kind = dictionary[@"kind"];
-  searchResult.price = dictionary[@"price"];
-  searchResult.currency = dictionary[@"currency"];
-  searchResult.genre = dictionary[@"primaryGenreName"];
-  return searchResult;
-}
-- (SearchResult *)parseEBook:(NSDictionary *)dictionary {
-  SearchResult *searchResult = [[SearchResult alloc] init];
-  searchResult.name = dictionary[@"trackName"];
-  searchResult.artistName = dictionary[@"artistName"];
-  searchResult.artworkURL60 = dictionary[@"artworkUrl60"];
-  searchResult.artworkURL100 = dictionary[@"artworkUrl100"];
-  searchResult.storeURL = dictionary[@"trackViewUrl"];
-  searchResult.kind = dictionary[@"kind"];
-  searchResult.price = dictionary[@"price"];
-  searchResult.currency = dictionary[@"currency"];
-  // E-books don’t have a “primaryGenreName” field, but an array of genres. You use the componentsJoinedByString method from NSArray to glue these genre names into a single string, separated by commas.
-  searchResult.genre =
-      [(NSArray *)dictionary[@"genres"] componentsJoinedByString:@", "];
-  return searchResult;
-}
-
 // We hookup the segment control up to this IBAction, so whenever the tab changes, this method is called
 - (IBAction)segmentChanged:(UISegmentedControl *)sender {
 // The app will always call performSearch if the user presses the Search button on the keyboard, but in the case of tapping on the Segmented Control it will only do a new search if the user has already performed a search before.
-  if (_searchResults != nil) {
+  if (_search != nil) {
     [self performSearch];
   }
     NSLog(@"Woooo");
@@ -408,7 +298,7 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
         initWithNibName:@"LandscapeViewController"
                  bundle:nil];
     // pass the results to the landscape view
-    _landscapeViewController.searchResults = _searchResults;
+    _landscapeViewController.search = _search;
     //  then you set the frame size of its view
     _landscapeViewController.view.frame = self.view.bounds;
     // LandscapeViewController starts out completely see-through (alpha = 0.0)

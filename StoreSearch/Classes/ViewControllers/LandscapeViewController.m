@@ -14,6 +14,7 @@
 // simply use that category from AFNetworking. Fortunately, they also provided a
 // similar category for UIButton!
 #import <AFNetworking/UIButton+AFNetworking.h>
+#import "Search.h"
 
 // You’re going to make the view controller the delegate of the scroll view so
 // it will be notified when the user is flicking through the pages.
@@ -118,7 +119,7 @@
 
   // Now you can loop through the array of search results and make a new button
   // for each SearchResult object:
-  for (SearchResult *searchResult in self.searchResults) {
+  for (SearchResult *searchResult in self.search.searchResults) {
 
     // Instead of a regular button you’re now making a “custom” one, and you’re
     // giving it a background image instead of a title.
@@ -171,7 +172,7 @@
   // 480 or 568 points (the width of a single page). With a simple formula you
   // can determine how many pages you need.
   int tilesPerPage = columnsPerPage * 3;
-  int numPages = (int)ceilf([self.searchResults count] / (float)tilesPerPage);
+  int numPages = (int)ceilf([self.search.searchResults count] / (float)tilesPerPage);
   self.scrollView.contentSize = CGSizeMake(numPages * scrollViewWidth,
                                            self.scrollView.bounds.size.height);
 
