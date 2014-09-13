@@ -189,6 +189,8 @@ static NSString * const LoadingCellIdentifier = @"LoadingCell";
       if (!success) {
           [self showNetworkError];
       }
+      // This will stop the spinner
+      [_landscapeViewController searchResultsReceived];
       [self.tableView reloadData];
   }];
   [self.tableView reloadData];

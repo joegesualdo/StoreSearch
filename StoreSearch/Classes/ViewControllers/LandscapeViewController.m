@@ -70,10 +70,19 @@
   // use the _firstTime variable to make sure you only place the buttons once.
   if (_firstTime) {
     _firstTime = NO;
-    //  that performs the math and places the buttons on the screen in neat rows
-    //  and columns. This needs to happen just once, when the
-    //  LandscapeViewController is added to the screen.
-    [self tileButtons];
+    // If there is no Search object then no search has been performed yet and you don’t have to do anything. However, if there is a Search object and its isLoading flag is set, then you need to show the activity spinner.
+    if (self.search != nil) {
+      if (self.search.isLoading) {
+        [self showSpinner];
+      //  there are no items in the searchResults array, you’ll call the showNothingFoundLabel method.
+      } else if ([self.search.searchResults count] == 0) {
+        [self showNothingFoundLabel];
+      } else
+      //  that performs the math and places the buttons on the screen in neat rows
+      //  and columns. This needs to happen just once, when the
+      //  LandscapeViewController is added to the screen.
+      [self tileButtons];
+    }
   }
 }
 
@@ -235,4 +244,52 @@
                    failure:nil];
 }
 
+//This programmatically creates a new UIActivityIndicatorView object (a big white one this time),
+- (void)showSpinner {
+  UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc]
+      initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+  // puts it in the center of the screen and starts animating it.
+  // You added 0.5f to the spinner’s center position. That is because this kind of spinner is 37 points wide and high, which is not an even number. If you were to place the center of this view at the exact center of the screen at (240,160) then it would extend 18.5 points to either end. The top-left corner of that spinner is at coordinates (221.5, 141.5), making it look all blurry.
+  // In general you should avoid placing objects at fractional coordinates. By adding 0.5 to both the X and Y, the spinner gets placed at (222, 142) and everything looks sharp. You have to pay attention to this when working with the center property and objects that have odd widths or heights.
+  spinner.center = CGPointMake(CGRectGetMidX(self.scrollView.bounds) + 0.5f,
+                               CGRectGetMidY(self.scrollView.bounds) + 0.5f);
+  // You give the spinner the tag 1000, so you can easily remove it from the screen when the search is done.
+  spinner.tag = 1000;
+  // add the spinner
+  [self.view addSubview:spinner];
+  // start animating the psinning
+  [spinner startAnimating];
+}
+
+- (void)searchResultsReceived {
+  [self hideSpinner];
+  if ([self.search.searchResults count] == 0) {
+    [self showNothingFoundLabel];
+  } else {
+    [self tileButtons];
+  }
+}
+// his looks for the view with tag 1000 and then tells that view – the activity spinner – to remove itself from the screen.
+- (void)hideSpinner {
+  [[self.view viewWithTag:1000] removeFromSuperview];
+}
+
+- (void)showNothingFoundLabel {
+  // Here you first create a UILabel object by hand
+  UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+  // give it text
+  label.text = @"Nothing Found";
+  // give it color. It’s important that the backgroundColor property is set to [UIColor clearColor] to make it see-through. Then you tell the label to resize itself to the optimal size using sizeToFit. You could have given the label a frame that was big enough to begin with, but I find this just as easy.
+  label.backgroundColor = [UIColor clearColor];
+  label.textColor = [UIColor whiteColor];
+  [label sizeToFit];
+  CGRect rect = label.frame;
+  // The only trouble is that you want to center the label in the view and as you saw before that gets tricky when the width or height are odd (something you don’t necessarily know in advance). So here you use a little trick to always force the dimensions of the label to be even numbers:
+  rect.size.width = ceilf(rect.size.width / 2.0f) * 2.0f;
+  rect.size.height = ceilf(rect.size.height / 2.0f) * 2.0f;
+  label.frame = rect;
+  label.center = CGPointMake(CGRectGetMidX(self.scrollView.bounds),
+                             CGRectGetMidY(self.scrollView.bounds));
+  [self.view addSubview:label];
+}
 @end

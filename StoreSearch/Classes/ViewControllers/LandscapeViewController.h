@@ -15,4 +15,7 @@
 // set this property in SearchViewController upon rotation to landscape. 
 @property (nonatomic, strong) Search *search;
 
+// tell the LandscapeViewController that the search results have come in (needed for showing and hiding spinner
+- (void)searchResultsReceived;
+
 @end
