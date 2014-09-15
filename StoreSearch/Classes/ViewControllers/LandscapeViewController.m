@@ -15,6 +15,7 @@
 // similar category for UIButton!
 #import <AFNetworking/UIButton+AFNetworking.h>
 #import "Search.h"
+#import "DetailViewController.h"
 
 // You’re going to make the view controller the delegate of the scroll view so
 // it will be notified when the user is flicking through the pages.
@@ -136,6 +137,12 @@
     [button setBackgroundImage:[UIImage imageNamed:@"LandscapeButton"]
                       forState:UIControlStateNormal];
     [self downloadImageForSearchResult:searchResult andPlaceOnButton:button];
+      
+      // First you give the button a tag, so you know to which index in the searchResults array this button corresponds. You need that in order to find the correct SearchResult object.
+      // I added 2000 to the index because tag 0 is used on all views by default so asking for a view with tag 0 might actually return a view that you didn’t expect. To avoid this kind of confusion, you simply start counting from 2000.
+    button.tag = 2000 + index;
+    // You also tell the button it should call the buttonPressed: method when it gets tapped.
+    [button addTarget:self action:@selector(buttonPressed:) forControlEvents:UIControlEventTouchUpInside];
 
     button.backgroundColor = [UIColor whiteColor];
     // For debugging purposes you give each button a title with an index,
@@ -291,5 +298,12 @@
   label.center = CGPointMake(CGRectGetMidX(self.scrollView.bounds),
                              CGRectGetMidY(self.scrollView.bounds));
   [self.view addSubview:label];
+}
+
+- (void)buttonPressed:(UIButton *)sender {
+    DetailViewController *controller = [[DetailViewController alloc] initWithNibName:@"DetailViewController" bundle:nil];
+    // get the index of the SearchResult object from an index-path but from the button’s tag (minus 2000).
+    SearchResult *searchResult = self.search.searchResults[sender.tag - 2000];
+    controller.searchResult = searchResult; [controller presentInParentViewController:self];
 }
 @end
